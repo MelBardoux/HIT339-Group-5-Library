@@ -1,0 +1,50 @@
+﻿@model LibrarySystem.ViewModels.LoanReturnViewModel
+
+@{
+    ViewData["Title"] = "Return Item";
+}
+
+<h2>Return Item</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Item</dt>
+    <dd class="col-sm-9">@Model.ItemLibraryCode — @Model.ItemName</dd>
+
+    <dt class="col-sm-3">Borrower</dt>
+    <dd class="col-sm-9">@Model.BorrowerName (@Model.BorrowerLibraryCard)</dd>
+
+    <dt class="col-sm-3">Borrowed</dt>
+    <dd class="col-sm-9">@Model.BorrowedDate.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Due</dt>
+    <dd class="col-sm-9">@Model.DueDate.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Return Date</dt>
+    <dd class="col-sm-9">@Model.ReturnDate.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Fine</dt>
+    <dd class="col-sm-9">
+        @if (Model.Fine > 0)
+        {
+            <span class="text-danger fw-bold">@Model.Fine.ToString("C")</span>
+        }
+        else
+        {
+            <span class="text-success">No fine</span>
+        }
+    </dd>
+
+    @if (!string.IsNullOrEmpty(Model.ReservedForName))
+    {
+        <dt class="col-sm-3">Reserved For</dt>
+        <dd class="col-sm-9">
+            <span class="badge bg-info">Reserved for @Model.ReservedForName</span>
+        </dd>
+    }
+</dl>
+
+<form asp-action="Return" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-primary me-2">Confirm Return</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

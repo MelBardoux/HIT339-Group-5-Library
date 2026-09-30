@@ -1,0 +1,48 @@
+﻿@model LibrarySystem.ViewModels.ToyDetailsViewModel
+
+@{
+    ViewData["Title"] = "Toy Details";
+}
+
+<h2>Toy Details</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Library Code</dt>
+    <dd class="col-sm-9">@Model.LibraryCode</dd>
+
+    <dt class="col-sm-3">Name</dt>
+    <dd class="col-sm-9">@Model.Name</dd>
+
+    <dt class="col-sm-3">Description</dt>
+    <dd class="col-sm-9">@Model.Description</dd>
+
+    <dt class="col-sm-3">Minimum Age</dt>
+    <dd class="col-sm-9">@Model.AgeDisplay</dd>
+
+    <dt class="col-sm-3">Battery Required</dt>
+    <dd class="col-sm-9">@(Model.BatteryRequired ? "Yes" : "No")</dd>
+
+    <dt class="col-sm-3">Types</dt>
+    <dd class="col-sm-9">
+        @if (Model.Types.Any())
+        {
+            @string.Join(", ", Model.Types)
+        }
+        else
+        {
+            <text>None</text>
+        }
+    </dd>
+
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+
+    <dt class="col-sm-3">Date Added</dt>
+    <dd class="col-sm-9">@Model.DateAdded.ToString("d MMMM yyyy")</dd>
+</dl>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Delete" asp-route-id="@Model.Id">Delete</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

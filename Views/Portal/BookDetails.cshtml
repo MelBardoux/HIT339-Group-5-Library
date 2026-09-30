@@ -1,0 +1,52 @@
+﻿@model LibrarySystem.ViewModels.SearchBookDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h2>@Model.Name</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Library Code</dt>
+    <dd class="col-sm-9">@Model.LibraryCode</dd>
+
+    <dt class="col-sm-3">Description</dt>
+    <dd class="col-sm-9">@Model.Description</dd>
+
+    <dt class="col-sm-3">Author</dt>
+    <dd class="col-sm-9">@Model.Author</dd>
+
+    <dt class="col-sm-3">Publication Year</dt>
+    <dd class="col-sm-9">@(Model.PublicationYear ?? "Unknown")</dd>
+
+    <dt class="col-sm-3">Genres</dt>
+    <dd class="col-sm-9">
+        @if (Model.Genres.Any())
+        {
+            @string.Join(", ", Model.Genres)
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.OtherGenre))
+        {
+            @(Model.Genres.Any() ? ", " : "")
+            @Model.OtherGenre
+        }
+        @if (!Model.Genres.Any() && string.IsNullOrWhiteSpace(Model.OtherGenre))
+        {
+            <text>None</text>
+        }
+    </dd>
+
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">
+        @if (Model.Status == "Available")
+        {
+            <span class="badge bg-success">@Model.Status</span>
+        }
+        else
+        {
+            <span class="badge bg-warning">@Model.Status</span>
+        }
+    </dd>
+</dl>
+<a asp-controller="Portal" asp-action="Random" asp-route-type="book" class="btn btn-primary me-2">Discover another book</a>
+<a asp-controller="Portal" asp-action="Index" asp-route-tab="books" class="btn btn-secondary">Search all books</a>

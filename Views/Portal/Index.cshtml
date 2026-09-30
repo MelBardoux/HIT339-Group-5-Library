@@ -1,0 +1,388 @@
+﻿@using LibrarySystem.Data
+@inject ApplicationDbContext DbContext
+
+@model LibrarySystem.ViewModels.PortalViewModel
+
+@{
+    ViewData["Title"] = "Library Portal";
+}
+
+<h2>Library Portal</h2>
+<p class="text-muted">Browse our collection of @DbContext.Items.Count() items</p>
+
+<div class="mb-4">
+    <select id="portalSearch" class="form-control" style="width: 100%;"></select>
+</div>
+
+<form method="get" asp-action="Index" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="searchTerm" class="form-control" placeholder="Search by name, author, artist, genre, library code..." value="@Model.SearchTerm" />
+        <button type="submit" class="btn btn-primary">Search</button>
+        @if (Model.IsSearching)
+        {
+            <a asp-action="Index" class="btn btn-secondary">Clear</a>
+        }
+    </div>
+</form>
+
+@if (Model.IsSearching)
+{
+    <p>Found @Model.SearchResults.Count result(s) for "@Model.SearchTerm"</p>
+
+    @if (Model.SearchResults.Any())
+    {
+        <div class="row">
+            @foreach (var result in Model.SearchResults)
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@result.Name</h5>
+                            <p class="card-text text-muted">@result.Summary</p>
+                            <span class="badge bg-secondary">@result.Type</span>
+                            @if (result.Status == "Available")
+                            {
+                                <span class="badge bg-success">@result.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">@result.Status</span>
+                            }
+                            <p class="mt-2"><small class="text-muted">@result.LibraryCode</small></p>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-action="Details" asp-route-id="@result.Id" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No items found.</p>
+    }
+}
+else
+{
+    <ul class="nav nav-tabs mb-3" id="browseTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.ActiveTab == "books" ? "active" : "")"
+               asp-action="Index" asp-route-tab="books"
+               asp-route-genreId="@Model.SelectedGenreId"
+               asp-route-sort="@Model.SelectedSort">Books</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.ActiveTab == "toys" ? "active" : "")"
+               asp-action="Index" asp-route-tab="toys"
+               asp-route-typeId="@Model.SelectedTypeId"
+               asp-route-sort="@Model.SelectedSort">Toys</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.ActiveTab == "music" ? "active" : "")"
+               asp-action="Index" asp-route-tab="music"
+               asp-route-formatId="@Model.SelectedFormatId"
+               asp-route-sort="@Model.SelectedSort">Music</a>
+        </li>
+    </ul>
+
+    @if (Model.ActiveTab == "books")
+    {
+        <form method="get" asp-action="Index" class="row mb-3">
+            <input type="hidden" name="tab" value="books" />
+            <div class="col-md-4">
+                <select name="genreId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Genres</option>
+                    @foreach (var genre in Model.BookGenres)
+                    {
+                        <option value="@genre.Id" selected="@(Model.SelectedGenreId == genre.Id)">@genre.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="name" selected="@(Model.SelectedSort == "name")">Sort by Name</option>
+                    <option value="author" selected="@(Model.SelectedSort == "author")">Sort by Author</option>
+                    <option value="year" selected="@(Model.SelectedSort == "year")">Sort by Year</option>
+                </select>
+            </div>
+        </form>
+
+        <!-- Desktop table -->
+        <div class="d-none d-md-block">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Library Code</th>
+                            <th>Name</th>
+                            <th>Author</th>
+                            <th>Year</th>
+                            <th>Genres</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in Model.Books)
+                        {
+                            <tr>
+                                <td>@book.LibraryCode</td>
+                                <td>@book.Name</td>
+                                <td>@book.AuthorName</td>
+                                <td>@book.PublicationYear</td>
+                                <td>@string.Join(", ", book.Genres)</td>
+                                <td>
+                                    @if (book.Status == "Available")
+                                    {
+                                        <span class="badge bg-success">@book.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">@book.Status</span>
+                                    }
+                                </td>
+                                <td><a asp-action="Details" asp-route-id="@book.Id">Details</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="d-md-none">
+            @foreach (var book in Model.Books)
+            {
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">@book.Name</h6>
+                        <p class="card-text mb-1"><small class="text-muted">@book.LibraryCode</small></p>
+                        <p class="card-text mb-1">@book.AuthorName · @book.PublicationYear</p>
+                        <p class="card-text mb-1"><small>@string.Join(", ", book.Genres)</small></p>
+                        @if (book.Status == "Available")
+                        {
+                            <span class="badge bg-success">@book.Status</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">@book.Status</span>
+                        }
+                        <a asp-action="Details" asp-route-id="@book.Id" class="btn btn-sm btn-outline-primary float-end">Details</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.ActiveTab == "toys")
+    {
+        <form method="get" asp-action="Index" class="row mb-3">
+            <input type="hidden" name="tab" value="toys" />
+            <div class="col-md-4">
+                <select name="typeId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Types</option>
+                    @foreach (var type in Model.ToyTypes)
+                    {
+                        <option value="@type.Id" selected="@(Model.SelectedTypeId == type.Id)">@type.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="name" selected="@(Model.SelectedSort == "name")">Sort by Name</option>
+                    <option value="age" selected="@(Model.SelectedSort == "age")">Sort by Age</option>
+                </select>
+            </div>
+        </form>
+
+        <!-- Desktop table -->
+        <div class="d-none d-md-block">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Library Code</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Battery</th>
+                            <th>Types</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var toy in Model.Toys)
+                        {
+                            <tr>
+                                <td>@toy.LibraryCode</td>
+                                <td>@toy.Name</td>
+                                <td>@toy.AgeDisplay</td>
+                                <td>@(toy.BatteryRequired ? "Yes" : "No")</td>
+                                <td>@string.Join(", ", toy.Types)</td>
+                                <td>
+                                    @if (toy.Status == "Available")
+                                    {
+                                        <span class="badge bg-success">@toy.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">@toy.Status</span>
+                                    }
+                                </td>
+                                <td><a asp-action="Details" asp-route-id="@toy.Id">Details</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="d-md-none">
+            @foreach (var toy in Model.Toys)
+            {
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">@toy.Name</h6>
+                        <p class="card-text mb-1"><small class="text-muted">@toy.LibraryCode</small></p>
+                        <p class="card-text mb-1">Ages @toy.AgeDisplay · Battery: @(toy.BatteryRequired ? "Yes" : "No")</p>
+                        <p class="card-text mb-1"><small>@string.Join(", ", toy.Types)</small></p>
+                        @if (toy.Status == "Available")
+                        {
+                            <span class="badge bg-success">@toy.Status</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">@toy.Status</span>
+                        }
+                        <a asp-action="Details" asp-route-id="@toy.Id" class="btn btn-sm btn-outline-primary float-end">Details</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.ActiveTab == "music")
+    {
+        <form method="get" asp-action="Index" class="row mb-3">
+            <input type="hidden" name="tab" value="music" />
+            <div class="col-md-4">
+                <select name="formatId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Formats</option>
+                    @foreach (var format in Model.MusicFormats)
+                    {
+                        <option value="@format.Id" selected="@(Model.SelectedFormatId == format.Id)">@format.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="name" selected="@(Model.SelectedSort == "name")">Sort by Name</option>
+                    <option value="artist" selected="@(Model.SelectedSort == "artist")">Sort by Artist</option>
+                    <option value="genre" selected="@(Model.SelectedSort == "genre")">Sort by Genre</option>
+                    <option value="year" selected="@(Model.SelectedSort == "year")">Sort by Year</option>
+                </select>
+            </div>
+        </form>
+
+        <!-- Desktop table -->
+        <div class="d-none d-md-block">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Library Code</th>
+                            <th>Name</th>
+                            <th>Album</th>
+                            <th>Artists</th>
+                            <th>Year</th>
+                            <th>Genres</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var music in Model.Music)
+                        {
+                            <tr>
+                                <td>@music.LibraryCode</td>
+                                <td>@music.Name</td>
+                                <td>@music.AlbumTitle</td>
+                                <td>@music.Artists</td>
+                                <td>@music.ReleaseYear</td>
+                                <td>@string.Join(", ", music.Genres)</td>
+                                <td>
+                                    @if (music.Status == "Available")
+                                    {
+                                        <span class="badge bg-success">@music.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">@music.Status</span>
+                                    }
+                                </td>
+                                <td><a asp-action="Details" asp-route-id="@music.Id">Details</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="d-md-none">
+            @foreach (var music in Model.Music)
+            {
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">@music.Name</h6>
+                        <p class="card-text mb-1"><small class="text-muted">@music.LibraryCode</small></p>
+                        <p class="card-text mb-1">@music.Artists · @music.AlbumTitle</p>
+                        <p class="card-text mb-1"><small>@music.ReleaseYear · @string.Join(", ", music.Genres)</small></p>
+                        <p class="card-text mb-1"><small>@string.Join(", ", music.Formats)</small></p>
+                        @if (music.Status == "Available")
+                        {
+                            <span class="badge bg-success">@music.Status</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">@music.Status</span>
+                        }
+                        <a asp-action="Details" asp-route-id="@music.Id" class="btn btn-sm btn-outline-primary float-end">Details</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@section Scripts {
+    <link rel="stylesheet" href="~/lib/select2/select2.min.css" />
+    <script src="~/lib/select2/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#portalSearch').select2({
+                ajax: {
+                    url: '@Url.Action("Autocomplete", "Portal")',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function(params) {
+                        return { term: params.term };
+                    },
+                    processResults: function(data) {
+                        return { results: data };
+                    }
+                },
+                minimumInputLength: 2,
+                placeholder: 'Quick search...',
+                allowClear: true
+            });
+
+            $('#portalSearch').on('select2:select', function(e) {
+                var id = e.params.data.id;
+                window.location.href = '@Url.Action("Details", "Portal")/' + id;
+            });
+        });
+    </script>
+}

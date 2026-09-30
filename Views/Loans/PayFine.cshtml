@@ -1,0 +1,24 @@
+﻿@model LibrarySystem.ViewModels.LoanPayFineViewModel
+
+@{
+    ViewData["Title"] = "Pay Fine";
+}
+
+<h2>Pay Fine</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Item</dt>
+    <dd class="col-sm-9">@Model.ItemLibraryCode — @Model.ItemName</dd>
+
+    <dt class="col-sm-3">Borrower</dt>
+    <dd class="col-sm-9">@Model.BorrowerName</dd>
+
+    <dt class="col-sm-3">Fine Amount</dt>
+    <dd class="col-sm-9 text-danger fw-bold">@Model.Fine.ToString("C")</dd>
+</dl>
+
+<form asp-action="PayFine" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-success">Mark as Paid</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,0 +1,82 @@
+﻿@model List<LibrarySystem.ViewModels.LoanIndexViewModel>
+
+@{
+    ViewData["Title"] = "Loan History";
+}
+
+<h2>Loan History</h2>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="get" asp-action="Index">
+            <input type="hidden" name="sort" value="@ViewBag.Sort" />
+            <select name="filter" class="form-select" onchange="this.form.submit()">
+                <option value="">All Loans</option>
+                <option value="notreturned" selected="@(ViewBag.Filter == "notreturned")">Not Returned</option>
+                <option value="returned" selected="@(ViewBag.Filter == "returned")">Returned</option>
+                <option value="hasfine" selected="@(ViewBag.Filter == "hasfine")">Has Fine</option>
+            </select>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <form method="get" asp-action="Index">
+            <input type="hidden" name="filter" value="@ViewBag.Filter" />
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="">Most Recent</option>
+                <option value="fine_high" selected="@(ViewBag.Sort == "fine_high")">Fine: Highest First</option>
+                <option value="fine_low" selected="@(ViewBag.Sort == "fine_low")">Fine: Lowest First</option>
+                <option value="overdue" selected="@(ViewBag.Sort == "overdue")">Longest Overdue</option>
+            </select>
+        </form>
+    </div>
+    @if (!string.IsNullOrEmpty((string?)ViewBag.Filter) || !string.IsNullOrEmpty((string?)ViewBag.Sort))
+    {
+        <div class="col-md-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    }
+</div>
+
+<p>
+    <a asp-action="Borrow" class="btn btn-primary">New Loan</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Item Code</th>
+            <th>Item Name</th>
+            <th>Borrower</th>
+            <th>Borrowed</th>
+            <th>Due</th>
+            <th>Returned</th>
+            <th>Fine</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var loan in Model)
+        {
+            <tr>
+                <td>@loan.ItemLibraryCode</td>
+                <td>@loan.ItemName</td>
+                <td>@loan.BorrowerName (@loan.BorrowerLibraryCard)</td>
+                <td>@loan.BorrowedDate.ToString("dd/MM/yyyy")</td>
+                <td>@loan.DueDate.ToString("dd/MM/yyyy")</td>
+                <td>@(loan.ReturnedDate?.ToString("dd/MM/yyyy") ?? "Not returned")</td>
+                <td>@(loan.Fine?.ToString("C") ?? "-")</td>
+                <td>
+                    @if (loan.ReturnedDate == null)
+                    {
+                        <a asp-action="Return" asp-route-id="@loan.Id">Return</a>
+                    }
+                    @if (loan.Fine > 0)
+                    {
+                        <text> | </text>
+                        <a asp-action="PayFine" asp-route-id="@loan.Id">Pay Fine</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

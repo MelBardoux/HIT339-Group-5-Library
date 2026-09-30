@@ -1,0 +1,234 @@
+﻿@model LibrarySystem.ViewModels.MusicEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Music";
+}
+
+<h2>Edit Music</h2>
+
+<form asp-action="Edit" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="LibraryCode" />
+
+    <div class="mb-3">
+        <label class="form-label">Library Code</label>
+        <input type="text" class="form-control" value="@Model.LibraryCode" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AlbumTitle" class="form-label">Album Title</label>
+        <input asp-for="AlbumTitle" class="form-control" />
+        <span asp-validation-for="AlbumTitle" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Artists</label>
+        <select id="ArtistNames" name="ArtistNames" class="form-control" multiple="multiple">
+            @if (Model.ArtistNames != null)
+            {
+                @foreach (var name in Model.ArtistNames)
+                {
+                    <option value="@name" selected>@name</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ReleaseYear" class="form-label">Release Year</label>
+        <input asp-for="ReleaseYear"
+               type="text"
+               inputmode="numeric"
+               class="form-control"
+               id="ReleaseYear"
+               placeholder="YYYY"
+               maxlength="4"
+               autocomplete="off" />
+        <span asp-validation-for="ReleaseYear" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="ReleaseYearUnknown" class="form-check-input" />
+        <label asp-for="ReleaseYearUnknown" class="form-check-label">Release year unknown</label>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" asp-items="Html.GetEnumSelectList<LibrarySystem.Models.ItemStatus>()" class="form-select"></select>
+    </div>
+
+    <div class="mb-3 form-check" id="onOrderContainer" style="display:none;">
+        <input asp-for="OnOrder" class="form-check-input" />
+        <label asp-for="OnOrder" class="form-check-label">On Order (replacement)</label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Genres</label>
+        @for (int i = 0; i < Model.AvailableGenres.Count; i++)
+        {
+            <div class="form-check">
+                <input type="hidden" name="AvailableGenres[@i].Id" value="@Model.AvailableGenres[i].Id" />
+                <input type="hidden" name="AvailableGenres[@i].Name" value="@Model.AvailableGenres[i].Name" />
+                <input type="checkbox"
+                       name="AvailableGenres[@i].IsSelected"
+                       value="true"
+                       class="form-check-input"
+                       id="genre_@Model.AvailableGenres[i].Id"
+                @(Model.AvailableGenres[i].IsSelected ? "checked" : "") />
+                <label class="form-check-label" for="genre_@Model.AvailableGenres[i].Id">
+                    @Model.AvailableGenres[i].Name
+                </label>
+            </div>
+        }
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Formats</label>
+        @for (int i = 0; i < Model.AvailableFormats.Count; i++)
+        {
+            <div class="form-check">
+                <input type="hidden" name="AvailableFormats[@i].Id" value="@Model.AvailableFormats[i].Id" />
+                <input type="hidden" name="AvailableFormats[@i].Name" value="@Model.AvailableFormats[i].Name" />
+                <input type="checkbox"
+                       name="AvailableFormats[@i].IsSelected"
+                       value="true"
+                       class="form-check-input"
+                       id="format_@Model.AvailableFormats[i].Id"
+                @(Model.AvailableFormats[i].IsSelected ? "checked" : "") />
+                <label class="form-check-label" for="format_@Model.AvailableFormats[i].Id">
+                    @Model.AvailableFormats[i].Name
+                </label>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/lib/select2/select2.min.css" />
+    <script src="~/lib/select2/select2.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $.validator.addMethod('yearrange', function(value, element, params) {
+            var unknownCheckbox = document.getElementById(params.unknownflag);
+            if (unknownCheckbox && unknownCheckbox.checked) {
+                return true;
+            }
+            if (!value || value.trim() === '') {
+                element.setAttribute('data-yearrange-reason', 'empty');
+                return false;
+            }
+            var year = parseInt(value, 10);
+            if (isNaN(year) || year < parseInt(params.min) || year > parseInt(params.max)) {
+                element.setAttribute('data-yearrange-reason', 'range');
+                return false;
+            }
+            return true;
+        });
+
+        $.validator.unobtrusive.adapters.add('yearrange', ['min', 'max', 'unknownflag'], function(options) {
+            options.rules['yearrange'] = {
+                min: options.params.min,
+                max: options.params.max,
+                unknownflag: options.params.unknownflag
+            };
+            options.messages['yearrange'] = function(params, element) {
+                var reason = element.getAttribute('data-yearrange-reason');
+                if (reason === 'empty') {
+                    return 'A release year is required unless marked as unknown.';
+                }
+                return 'Year must be between ' + params.min + ' and ' + params.max + '.';
+            };
+        });
+
+        $(document).ready(function() {
+            $('#ArtistNames').select2({
+                ajax: {
+                    url: '@Url.Action("SearchArtists", "Artists")',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function(params) {
+                        return { term: params.term };
+                    },
+                    processResults: function(data) {
+                        return { results: data };
+                    }
+                },
+                minimumInputLength: 1,
+                tags: true,
+                placeholder: 'Search or add artists',
+                allowClear: true,
+                multiple: true,
+                createTag: function(params) {
+                    var term = $.trim(params.term);
+                    if (term === '') return null;
+                    return {
+                        id: term,
+                        text: term,
+                        newTag: true
+                    };
+                }
+            });
+
+            var $yearInput = $('#ReleaseYear');
+            var $unknownCheck = $('#ReleaseYearUnknown');
+
+            $unknownCheck.change(function() {
+                if (this.checked) {
+                    $yearInput.val('').prop('disabled', true);
+                    $yearInput.valid();
+                } else {
+                    $yearInput.prop('disabled', false);
+                }
+            });
+
+            $yearInput.on('input', function() {
+                var val = $(this).val().replace(/[^0-9]/g, '');
+                if (val.length > 4) val = val.substring(0, 4);
+                $(this).val(val);
+
+                if (val !== '') {
+                    $unknownCheck.prop('checked', false);
+                }
+            });
+
+            $yearInput.on('keypress', function(e) {
+                if (!/[0-9]/.test(String.fromCharCode(e.which))) {
+                    e.preventDefault();
+                }
+            });
+
+            if ($unknownCheck.is(':checked')) {
+                $yearInput.val('').prop('disabled', true);
+            }
+
+            var $statusSelect = $('[name="Status"]');
+            function toggleOnOrder() {
+                var val = $statusSelect.val();
+                if (val === '3' || val === '4' || val === '5') {
+                    $('#onOrderContainer').show();
+                } else {
+                    $('#onOrderContainer').hide();
+                    $('#OnOrder').prop('checked', false);
+                }
+            }
+            $statusSelect.change(toggleOnOrder);
+            toggleOnOrder();
+        });
+    </script>
+}

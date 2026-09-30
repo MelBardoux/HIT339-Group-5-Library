@@ -1,0 +1,160 @@
+﻿@model LibrarySystem.ViewModels.LoanBorrowViewModel
+
+@{
+    ViewData["Title"] = "New Loan";
+}
+
+<h2>New Loan</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form asp-action="Borrow" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="LibraryCard" class="form-label">Member Library Card</label>
+        @if (Model.IsLookedUp)
+        {
+            <input asp-for="LibraryCard" class="form-control" readonly />
+        }
+        else
+        {
+            <input asp-for="LibraryCard" class="form-control" placeholder="e.g. BRW-0001" />
+        }
+        <span asp-validation-for="LibraryCard" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Item Library Codes (up to 10)</label>
+        <select id="LibraryCodes" name="LibraryCodes" class="form-control" multiple="multiple">
+            @if (Model.LibraryCodes != null)
+            {
+                @foreach (var code in Model.LibraryCodes)
+                {
+                    <option value="@code" selected>@code</option>
+                }
+            }
+        </select>
+    </div>
+
+    @if (Model.IsLookedUp && Model.BorrowerResult != null)
+    {
+        <div class="card mb-3 @(Model.BorrowerResult.IsSuspended ? "border-danger" : "border-success")">
+            <div class="card-body">
+                <h5 class="card-title">Member Details</h5>
+                <p><strong>Name:</strong> @Model.BorrowerResult.Name</p>
+                <p><strong>Library Card:</strong> @Model.BorrowerResult.LibraryCard</p>
+                <p><strong>Email:</strong> @Model.BorrowerResult.Email</p>
+                <p>
+                    <strong>Status:</strong>
+                    @if (Model.BorrowerResult.IsSuspended)
+                    {
+                        <span class="text-danger fw-bold">Suspended</span>
+                    }
+                    else
+                    {
+                        <span class="text-success">Active</span>
+                    }
+                </p>
+                @if (Model.BorrowerResult.OutstandingFines > 0)
+                {
+                    <p class="text-danger"><strong>Outstanding Fines:</strong> @Model.BorrowerResult.OutstandingFines.ToString("C")</p>
+                }
+                @if (Model.BorrowerResult.IsSuspended)
+                {
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" name="BorrowerOverride" value="true" id="borrowerOverride" />
+                        <label class="form-check-label" for="borrowerOverride">Override suspension</label>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <input type="hidden" name="BorrowerResult.Id" value="@Model.BorrowerResult.Id" />
+        <input type="hidden" name="BorrowerResult.LibraryCard" value="@Model.BorrowerResult.LibraryCard" />
+        <input type="hidden" name="BorrowerResult.Name" value="@Model.BorrowerResult.Name" />
+        <input type="hidden" name="BorrowerResult.Email" value="@Model.BorrowerResult.Email" />
+        <input type="hidden" name="BorrowerResult.Status" value="@Model.BorrowerResult.Status" />
+        <input type="hidden" name="BorrowerResult.IsSuspended" value="@Model.BorrowerResult.IsSuspended" />
+        <input type="hidden" name="BorrowerResult.OutstandingFines" value="@Model.BorrowerResult.OutstandingFines" />
+
+        @if (Model.ItemResults.Any())
+        {
+            <h5>Items</h5>
+            @foreach (var item in Model.ItemResults)
+            {
+                <div class="card mb-2 @(item.IsAvailable ? "border-success" : "border-warning")">
+                    <div class="card-body py-2">
+                        <strong>@item.LibraryCode</strong> — @item.Name (@item.Type)
+                        @if (item.IsAvailable)
+                        {
+                            <span class="badge bg-success ms-2">Available</span>
+                        }
+                        else if (item.Status == "Not found")
+                        {
+                            <span class="badge bg-danger ms-2">Not Found</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning ms-2">@item.Status</span>
+                        }
+                    </div>
+                </div>
+            }
+        }
+
+        <input type="hidden" asp-for="IsLookedUp" value="false" />
+
+        <button type="submit" class="btn btn-outline-primary mt-2 me-2">Update Lookup</button>
+
+        @if (Model.ItemResults.Any(i => i.IsAvailable))
+        {
+            <button type="submit" name="IsConfirmed" value="true" class="btn btn-success mt-2 me-2">Confirm Loan</button>
+        }
+        <a asp-action="Borrow" class="btn btn-secondary mt-2">Cancel</a>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary">Look Up</button>
+    }
+</form>
+
+@if (Model.IsLookedUp && Model.BorrowerResult != null && Model.ItemResults != null)
+{
+    @foreach (var item in Model.ItemResults.Where(i => !i.IsAvailable && i.Status != "Not found"))
+    {
+        <div class="mt-2">
+            <a href="@Url.Action("Reserve", "Loans", new { libraryCode = item.LibraryCode, libraryCard = Model.LibraryCard })"
+               class="btn btn-primary mt-2 me-2">Reserve @item.LibraryCode for @Model.BorrowerResult.Name</a>
+        </div>
+    }
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="~/lib/select2/select2.min.css" />
+    <script src="~/lib/select2/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#LibraryCodes').select2({
+                tags: true,
+                tokenSeparators: [',', ' '],
+                placeholder: 'e.g. BKS-0001, TOY-0001',
+                maximumSelectionLength: 10,
+                createTag: function(params) {
+                    var term = $.trim(params.term).toUpperCase();
+                    if (term === '') return null;
+                    return { id: term, text: term, newTag: true };
+                }
+            });
+        });
+    </script>
+}

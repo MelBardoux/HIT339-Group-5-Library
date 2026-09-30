@@ -1,0 +1,301 @@
+﻿@model LibrarySystem.ViewModels.ManagerViewModel
+
+@{
+    ViewData["Title"] = "Manager Dashboard";
+}
+
+<h2>Manager Dashboard</h2>
+
+<ul class="nav nav-tabs mb-4" id="statsTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="borrowing-tab" data-bs-toggle="tab" data-bs-target="#borrowing" type="button" role="tab">Borrowing</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#items" type="button" role="tab">Items</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="fines-tab" data-bs-toggle="tab" data-bs-target="#fines" type="button" role="tab">Fines</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="statsTabContent">
+
+    <!-- Borrowing Tab -->
+    <div class="tab-pane fade show active" id="borrowing" role="tabpanel">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Loans</h5>
+                        <p class="display-6">@Model.BorrowingStats.TotalLoans</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Loans</h5>
+                        <p class="display-6">@Model.BorrowingStats.ActiveLoans</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-danger">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger">Overdue</h5>
+                        <p class="display-6 text-danger">@Model.BorrowingStats.OverdueLoans</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.BorrowingStats.MostBorrowedItems.Any())
+        {
+            <h5>Most Borrowed Items</h5>
+            <table class="table table-sm mb-4">
+                <thead>
+                    <tr>
+                        <th>Library Code</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Times Borrowed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.BorrowingStats.MostBorrowedItems)
+                    {
+                        <tr>
+                            <td>@item.LibraryCode</td>
+                            <td>@item.Name</td>
+                            <td>@item.Type</td>
+                            <td>@item.BorrowCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (Model.BorrowingStats.BusiestBorrowers.Any())
+        {
+            <h5>Busiest Borrowers</h5>
+            <table class="table table-sm mb-4">
+                <thead>
+                    <tr>
+                        <th>Library Card</th>
+                        <th>Name</th>
+                        <th>Loans</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.BorrowingStats.BusiestBorrowers)
+                    {
+                        <tr>
+                            <td>@b.LibraryCard</td>
+                            <td>@b.Name</td>
+                            <td>@b.LoanCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (Model.BorrowingStats.LoansPerMonth.Any())
+        {
+            <h5>Loans Per Month</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Loans</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.BorrowingStats.LoansPerMonth)
+                    {
+                        <tr>
+                            <td>@m.Month</td>
+                            <td>@m.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- Items Tab -->
+    <div class="tab-pane fade" id="items" role="tabpanel">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Items</h5>
+                        <p class="display-6">@Model.ItemStats.TotalItems</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Books</h5>
+                        <p class="display-6">@Model.ItemStats.BookCount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Toys</h5>
+                        <p class="display-6">@Model.ItemStats.ToyCount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Music</h5>
+                        <p class="display-6">@Model.ItemStats.MusicCount</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">On Order</h5>
+                        <p class="display-6 text-success">@Model.ItemStats.OnOrderCount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-center border-info">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">Reserved</h5>
+                        <p class="display-6 text-info">@Model.ItemStats.ReservedCount</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.ItemStats.StatusCounts.Any())
+        {
+            <h5>Items by Status</h5>
+            <table class="table table-sm mb-4">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.ItemStats.StatusCounts)
+                    {
+                        <tr>
+                            <td>@s.Status</td>
+                            <td>@s.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (Model.ItemStats.PopularGenres.Any())
+        {
+            <h5>Popular Book Genres</h5>
+            <table class="table table-sm mb-4">
+                <thead>
+                    <tr>
+                        <th>Genre</th>
+                        <th>Books</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var g in Model.ItemStats.PopularGenres)
+                    {
+                        <tr>
+                            <td>@g.Genre</td>
+                            <td>@g.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (Model.ItemStats.ItemsAddedPerMonth.Any())
+        {
+            <h5>Items Added Per Month</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Items</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.ItemStats.ItemsAddedPerMonth)
+                    {
+                        <tr>
+                            <td>@m.Month</td>
+                            <td>@m.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- Fines Tab -->
+    <div class="tab-pane fade" id="fines" role="tabpanel">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Outstanding Fines</h5>
+                        <p class="display-6 text-danger">@Model.FineStats.OutstandingFines.ToString("C")</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Collected</h5>
+                        <p class="display-6">@Model.FineStats.TotalFinesCollected.ToString("C")</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Average Fine</h5>
+                        <p class="display-6">@Model.FineStats.AverageFineAmount.ToString("C")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.FineStats.BorrowersWithOutstandingFines.Any())
+        {
+            <h5>Borrowers with Outstanding Fines</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Library Card</th>
+                        <th>Name</th>
+                        <th>Total Fines</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.FineStats.BorrowersWithOutstandingFines)
+                    {
+                        <tr>
+                            <td>@b.LibraryCard</td>
+                            <td>@b.Name</td>
+                            <td class="text-danger">@b.TotalFines.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

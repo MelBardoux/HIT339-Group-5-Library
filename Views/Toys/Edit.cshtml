@@ -1,0 +1,94 @@
+﻿@model LibrarySystem.ViewModels.ToyEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Toy";
+}
+
+<h2>Edit Toy</h2>
+
+<form asp-action="Edit" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="LibraryCode" />
+
+    <div class="mb-3">
+        <label class="form-label">Library Code</label>
+        <input type="text" class="form-control" value="@Model.LibraryCode" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="MinimumAge" class="form-label">Minimum Age</label>
+        <input asp-for="MinimumAge" class="form-control" type="number" min="0" max="18" />
+        <span asp-validation-for="MinimumAge" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="BatteryRequired" class="form-check-input" />
+        <label asp-for="BatteryRequired" class="form-check-label">Battery Required</label>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" asp-items="Html.GetEnumSelectList<LibrarySystem.Models.ItemStatus>()" class="form-select"></select>
+    </div>
+
+    <div class="mb-3 form-check" id="onOrderContainer" style="display:none;">
+        <input asp-for="OnOrder" class="form-check-input" />
+        <label asp-for="OnOrder" class="form-check-label">On Order (replacement)</label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Types</label>
+        @for (int i = 0; i < Model.AvailableTypes.Count; i++)
+        {
+            <div class="form-check">
+                <input type="hidden" name="AvailableTypes[@i].Id" value="@Model.AvailableTypes[i].Id" />
+                <input type="hidden" name="AvailableTypes[@i].Name" value="@Model.AvailableTypes[i].Name" />
+                <input type="checkbox"
+                       name="AvailableTypes[@i].IsSelected"
+                       value="true"
+                       class="form-check-input"
+                       id="type_@Model.AvailableTypes[i].Id"
+                @(Model.AvailableTypes[i].IsSelected ? "checked" : "") />
+                <label class="form-check-label" for="type_@Model.AvailableTypes[i].Id">
+                    @Model.AvailableTypes[i].Name
+                </label>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            var $statusSelect = $('[name="Status"]');
+            function toggleOnOrder() {
+                var val = $statusSelect.val();
+                if (val === '3' || val === '4' || val === '5') {
+                    $('#onOrderContainer').show();
+                } else {
+                    $('#onOrderContainer').hide();
+                    $('#OnOrder').prop('checked', false);
+                }
+            }
+            $statusSelect.change(toggleOnOrder);
+            toggleOnOrder();
+        });
+    </script>
+}

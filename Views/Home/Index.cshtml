@@ -1,0 +1,53 @@
+﻿@using LibrarySystem.Data
+@using LibrarySystem.Models
+@inject ApplicationDbContext DbContext
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    .home-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .home-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+</style>
+
+<div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 500;">Welcome to the Library</h1>
+    <p class="lead text-muted">A library management system for books, toys, and music</p>
+</div>
+
+<div class="row text-center">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 border-primary home-card">
+            <div class="card-body py-4">
+                <h5 class="card-title text-primary" style="font-weight: 600;">Books</h5>
+                <p class="display-5 text-primary mb-3" style="font-weight: 500;">@DbContext.Books.Count(b => b.Status != LibrarySystem.Models.ItemStatus.Destroyed && b.Status != LibrarySystem.Models.ItemStatus.Lost)</p>
+                <a asp-controller="Portal" asp-action="Random" asp-route-type="book" class="btn btn-outline-primary">Discover a book</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 border-primary home-card">
+            <div class="card-body py-4">
+                <h5 class="card-title text-primary" style="font-weight: 600;">Toys</h5>
+                <p class="display-5 text-primary mb-3" style="font-weight: 500;">@DbContext.Toys.Count(t => t.Status != LibrarySystem.Models.ItemStatus.Destroyed && t.Status != LibrarySystem.Models.ItemStatus.Lost)</p>
+                <a asp-controller="Portal" asp-action="Random" asp-route-type="toy" class="btn btn-outline-primary">Find a toy</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 border-primary home-card">
+            <div class="card-body py-4">
+                <h5 class="card-title text-primary" style="font-weight: 600;">Music</h5>
+                <p class="display-5 text-primary mb-3" style="font-weight: 500;">@DbContext.Music.Count(m => m.Status != LibrarySystem.Models.ItemStatus.Destroyed && m.Status != LibrarySystem.Models.ItemStatus.Lost)</p>
+                <a asp-controller="Portal" asp-action="Random" asp-route-type="music" class="btn btn-outline-primary">Listen to something new</a>
+            </div>
+        </div>
+    </div>
+</div>

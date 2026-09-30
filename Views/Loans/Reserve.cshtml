@@ -1,0 +1,30 @@
+﻿@model LibrarySystem.ViewModels.LoanReserveViewModel
+
+@{
+    ViewData["Title"] = "Reserve Item";
+}
+
+<h2>Reserve Item</h2>
+
+<p>Reserve this item for the following member?</p>
+
+<dl class="row">
+    <dt class="col-sm-3">Item</dt>
+    <dd class="col-sm-9">@Model.ItemLibraryCode — @Model.ItemName</dd>
+
+    <dt class="col-sm-3">Current Status</dt>
+    <dd class="col-sm-9">@Model.ItemStatus</dd>
+
+    <dt class="col-sm-3">Reserve For</dt>
+    <dd class="col-sm-9">@Model.BorrowerName (@Model.BorrowerLibraryCard)</dd>
+</dl>
+
+<form asp-action="Reserve" method="post">
+    <input type="hidden" asp-for="ItemLibraryCode" />
+    <input type="hidden" asp-for="ItemName" />
+    <input type="hidden" asp-for="ItemStatus" />
+    <input type="hidden" asp-for="BorrowerName" />
+    <input type="hidden" asp-for="BorrowerLibraryCard" />
+    <button type="submit" class="btn btn-primary me-2">Confirm Reservation</button>
+    <a asp-action="Borrow" class="btn btn-secondary">Cancel</a>
+</form>

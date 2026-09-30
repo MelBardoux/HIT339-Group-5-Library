@@ -1,0 +1,114 @@
+﻿@model List<LibrarySystem.ViewModels.MusicIndexViewModel>
+
+@{
+    ViewData["Title"] = "Music";
+}
+
+<h2>Music</h2>
+
+<div class="row mb-3">
+    <div class="col-md-5">
+        <form method="get" asp-action="Index" id="searchForm">
+            <div class="input-group">
+                <select id="searchSelect" name="searchTerm" class="form-control" style="width: 70%;"></select>
+                <input type="hidden" name="status" value="@ViewBag.Status" />
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+                @if (!string.IsNullOrEmpty((string?)ViewBag.SearchTerm) || !string.IsNullOrEmpty((string?)ViewBag.Status))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                }
+            </div>
+        </form>
+    </div>
+    <div class="col-md-3">
+        <form method="get" asp-action="Index">
+            <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                @foreach (var s in Enum.GetValues<LibrarySystem.Models.ItemStatus>())
+                {
+                    <option value="@s" selected="@(ViewBag.Status == s.ToString())">@s</option>
+                }
+                <option value="HasReservation" selected="@(ViewBag.Status == "HasReservation")">Has Reservation</option>
+                <option value="OnOrder" selected="@(ViewBag.Status == "OnOrder")">On Order</option>
+            </select>
+        </form>
+    </div>
+</div>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add New Music</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Library Code</th>
+            <th>Name</th>
+            <th>Album</th>
+            <th>Artists</th>
+            <th>Release Year</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var music in Model)
+        {
+            <tr>
+                <td>@music.LibraryCode</td>
+                <td>@music.Name</td>
+                <td>@music.AlbumTitle</td>
+                <td>@music.Artists</td>
+                <td>@(music.ReleaseYearUnknown ? "Unknown" : music.ReleaseYear?.ToString())</td>
+                <td>
+                    @music.Status
+                    @if (music.OnOrder)
+                    {
+                        <br /><span class="badge bg-success">On Order</span>
+                    }
+                    @if (!string.IsNullOrEmpty(music.ReservedForCard))
+                    {
+                        <br /><span class="badge bg-info">Reserved (@music.ReservedForCard)</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@music.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@music.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@music.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/lib/select2/select2.min.css" />
+    <script src="~/lib/select2/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#searchSelect').select2({
+                ajax: {
+                    url: '@Url.Action("SearchMusic", "Music")',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function(params) {
+                        return { term: params.term };
+                    },
+                    processResults: function(data) {
+                        return { results: data };
+                    }
+                },
+                minimumInputLength: 1,
+                tags: true,
+                placeholder: 'Search by name, code, album, or artist...',
+                allowClear: true,
+                createTag: function(params) {
+                    var term = $.trim(params.term);
+                    if (term === '') return null;
+                    return { id: term, text: term };
+                }
+            });
+        });
+    </script>
+}

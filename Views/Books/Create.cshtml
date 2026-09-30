@@ -1,0 +1,195 @@
+﻿@model LibrarySystem.ViewModels.BookViewModel
+
+@{
+    ViewData["Title"] = "Create Book";
+}
+
+<h2>Create Book</h2>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AuthorName" class="form-label">Author</label>
+        <select id="AuthorName" name="AuthorName" class="form-control">
+            @if (!string.IsNullOrEmpty(Model.AuthorName))
+            {
+                <option value="@Model.AuthorName" selected>@Model.AuthorName</option>
+            }
+        </select>
+        <span asp-validation-for="AuthorName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PublicationYear" class="form-label">Publication Year</label>
+        <input asp-for="PublicationYear"
+               type="text"
+               inputmode="numeric"
+               class="form-control"
+               id="PublicationYear"
+               placeholder="YYYY"
+               maxlength="4" 
+               autocomplete="off" />
+        <span asp-validation-for="PublicationYear" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="PublicationYearUnknown" class="form-check-input" />
+        <label asp-for="PublicationYearUnknown" class="form-check-label">Publication year unknown</label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Genres</label>
+        @for (int i = 0; i < Model.AvailableGenres.Count; i++)
+        {
+            <div class="form-check">
+                <input type="hidden" name="AvailableGenres[@i].Id" value="@Model.AvailableGenres[i].Id" />
+                <input type="hidden" name="AvailableGenres[@i].Name" value="@Model.AvailableGenres[i].Name" />
+                <input type="checkbox"
+                       name="AvailableGenres[@i].IsSelected"
+                       value="true"
+                       class="form-check-input"
+                       id="genre_@Model.AvailableGenres[i].Id"
+                @(Model.AvailableGenres[i].IsSelected ? "checked" : "") />
+                <label class="form-check-label" for="genre_@Model.AvailableGenres[i].Id">
+                    @Model.AvailableGenres[i].Name
+                </label>
+            </div>
+        }
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="OtherGenreSelected" class="form-check-input" id="otherGenreCheck" />
+        <label asp-for="OtherGenreSelected" class="form-check-label">Other</label>
+    </div>
+
+    <div class="mb-3" id="otherGenreContainer" style="display:none;">
+        <label asp-for="OtherGenreName" class="form-label">Specify genre</label>
+        <input asp-for="OtherGenreName" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/lib/select2/select2.min.css" />
+    <script src="~/lib/select2/select2.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $.validator.addMethod('yearrange', function(value, element, params) {
+            var unknownCheckbox = document.getElementById(params.unknownflag);
+            if (unknownCheckbox && unknownCheckbox.checked) {
+                return true;
+            }
+            if (!value || value.trim() === '') {
+                element.setAttribute('data-yearrange-reason', 'empty');
+                return false;
+            }
+            var year = parseInt(value, 10);
+            if (isNaN(year) || year < parseInt(params.min) || year > parseInt(params.max)) {
+                element.setAttribute('data-yearrange-reason', 'range');
+                return false;
+            }
+            return true;
+        });
+
+        $.validator.unobtrusive.adapters.add('yearrange', ['min', 'max', 'unknownflag'], function(options) {
+            options.rules['yearrange'] = {
+                min: options.params.min,
+                max: options.params.max,
+                unknownflag: options.params.unknownflag
+            };
+            options.messages['yearrange'] = function(params, element) {
+                var reason = element.getAttribute('data-yearrange-reason');
+                if (reason === 'empty') {
+                    return 'A publication year is required unless marked as unknown.';
+                }
+                return 'Year must be between ' + params.min + ' and ' + params.max + '.';
+            };
+        });
+        $(document).ready(function() {
+            $('#AuthorName').select2({
+                ajax: {
+                    url: '@Url.Action("SearchAuthors", "Authors")',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function(params) {
+                        return { term: params.term };
+                    },
+                    processResults: function(data) {
+                        return { results: data };
+                    }
+                },
+                minimumInputLength: 1,
+                tags: true,
+                placeholder: 'Search or add an author',
+                allowClear: true,
+                createTag: function(params) {
+                    var term = $.trim(params.term);
+                    if (term === '') return null;
+                    return {
+                        id: term,
+                        text: term,
+                        newTag: true
+                    };
+                }
+            });
+
+            $('#otherGenreCheck').change(function() {
+                $('#otherGenreContainer').toggle(this.checked);
+                if (!this.checked) {
+                    $('#OtherGenreName').val('');
+                }
+            });
+
+            if ($('#otherGenreCheck').is(':checked')) {
+                $('#otherGenreContainer').show();
+            }
+
+            var $yearInput = $('#PublicationYear');
+            var $unknownCheck = $('#PublicationYearUnknown');
+
+            $unknownCheck.change(function() {
+                if (this.checked) {
+                    $yearInput.val('').prop('disabled', true);
+                    $yearInput.valid();
+                } else {
+                    $yearInput.prop('disabled', false);
+                }
+            });
+
+            $yearInput.on('input', function() {
+                var val = $(this).val().replace(/[^0-9]/g, '');
+                if (val.length > 4) val = val.substring(0, 4);
+                $(this).val(val);
+
+                if (val !== '') {
+                    $unknownCheck.prop('checked', false);
+                }
+            });
+
+            $yearInput.on('keypress', function(e) {
+                if (!/[0-9]/.test(String.fromCharCode(e.which))) {
+                    e.preventDefault();
+                }
+            });
+
+            if ($unknownCheck.is(':checked')) {
+                $yearInput.val('').prop('disabled', true);
+            }
+        });
+    </script>
+}
