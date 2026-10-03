@@ -15,6 +15,7 @@ namespace LibrarySystem.Data
         public DbSet<Music> Music { get; set; }
 
         public DbSet<Branch> Branches {  get; set; } //Branch update for multi-location expansion
+        public DbSet<ReceptionDesk> ReceptionDesks { get; set; } //ReceptionDesk update for reception desks in multi branch location feature
 
         public DbSet<Author> Authors { get; set; }
         public DbSet<BookGenre> BookGenres { get; set; }

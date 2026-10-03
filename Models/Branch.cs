@@ -15,5 +15,7 @@ namespace LibrarySystem.Models
         public string Address { get; set; }
 
         public ICollection<Item> Items { get; set; } = new List<Item>();
+
+        public ICollection<ReceptionDesk> ReceptionDesks { get; set; } = new List<ReceptionDesk>();
     }
 }
