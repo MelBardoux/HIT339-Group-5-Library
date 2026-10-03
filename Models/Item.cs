@@ -11,6 +11,10 @@ namespace LibrarySystem.Models
     {
         public int Id { get; set; }
 
+        // Added Branch properties to item class
+        public int BranchId { get; set; }
+        public Branch Branch { get; set; } = null!;
+
         [Required]
         [StringLength(100)]
         [RegularExpression(@"^[a-zA-ZÀ-ÿ\s.\-']+$",
