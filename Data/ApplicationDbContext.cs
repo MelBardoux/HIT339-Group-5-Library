@@ -14,6 +14,8 @@ namespace LibrarySystem.Data
         public DbSet<Toy> Toys { get; set; }
         public DbSet<Music> Music { get; set; }
 
+        public DbSet<Branch> Branches {  get; set; } //Branch update for multi-location expansion
+
         public DbSet<Author> Authors { get; set; }
         public DbSet<BookGenre> BookGenres { get; set; }
         public DbSet<ToyType> ToyTypes { get; set; }
