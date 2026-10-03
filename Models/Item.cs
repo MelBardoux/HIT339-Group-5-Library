@@ -12,7 +12,7 @@ namespace LibrarySystem.Models
         public int Id { get; set; }
 
         // Added Branch properties to item class
-        public int BranchId { get; set; }
+        public int BranchId { get; set; } = 1;
         public Branch Branch { get; set; } = null!;
 
         [Required]
