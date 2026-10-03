@@ -226,6 +226,57 @@ namespace LibrarySystem.Data
                 await context.SaveChangesAsync();
             }
 
+
+            // Seed Reception Desks
+            if (!context.ReceptionDesks.Any())
+            {
+                var darwin = context.Branches.FirstOrDefault(b => b.Name == "Darwin");
+                var sydney = context.Branches.FirstOrDefault(b => b.Name == "Sydney");
+                var brisbane = context.Branches.FirstOrDefault(b => b.Name == "Brisbane");
+
+                if (darwin == null || sydney == null || brisbane == null)
+                {
+                    throw new InvalidOperationException(
+                        "Required library branches were not found. Run the AddMultiBranch migration first.");
+                }
+
+                context.ReceptionDesks.AddRange(
+                    new ReceptionDesk
+                    {
+                        Name = "Reception Desk 1",
+                        BranchId = darwin.Id
+                    },
+                    new ReceptionDesk
+                    {
+                        Name = "Reception Desk 2",
+                        BranchId = darwin.Id
+                    },
+                    new ReceptionDesk
+                    {
+                        Name = "Reception Desk 1",
+                        BranchId = sydney.Id
+                    },
+                    new ReceptionDesk
+                    {
+                        Name = "Reception Desk 2",
+                        BranchId = sydney.Id
+                    },
+                    new ReceptionDesk
+                    {
+                        Name = "Reception Desk 1",
+                        BranchId = brisbane.Id
+                    },
+                    new ReceptionDesk
+                    {
+                        Name = "Reception Desk 2",
+                        BranchId = brisbane.Id
+                    }
+                );
+
+                await context.SaveChangesAsync();
+            }
+
+
             // Seed Books
             if (!context.Books.Any())
             {
