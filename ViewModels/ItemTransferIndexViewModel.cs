@@ -4,6 +4,9 @@
     {
         public int Id { get; set; }
 
+        public int FromBranchId { get; set; }
+        public int ToBranchId { get; set; }
+
         public string ItemLibraryCode { get; set; } = string.Empty;
         public string ItemName { get; set; } = string.Empty;
 

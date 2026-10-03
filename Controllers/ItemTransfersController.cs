@@ -50,27 +50,67 @@ namespace LibrarySystem.Controllers
                 .Select(t => new ItemTransferIndexViewModel
                 {
                     Id = t.Id,
+
+                    FromBranchId = t.FromBranchId,
+                    ToBranchId = t.ToBranchId,
+
                     ItemLibraryCode = t.Item.LibraryCode,
                     ItemName = t.Item.Name,
+
                     FromBranchName = t.FromBranch.Name,
                     ToBranchName = t.ToBranch.Name,
-                    RequestedByUserEmail = t.RequestedByUser.Email ?? t.RequestedByUser.UserName ?? "",
+
+                    RequestedByUserEmail =
+                        t.RequestedByUser.Email ??
+                        t.RequestedByUser.UserName ??
+                        "",
+
                     Status = t.Status.ToString(),
+
                     RequestedDate = t.RequestedDate,
                     CompletedDate = t.CompletedDate,
 
-                    CanApprove = t.Status == TransferStatus.Pending &&
-                    t.FromBranchId == staffBranch.BranchId,
+                    CanApprove =
+                        t.Status == TransferStatus.Pending &&
+                        t.FromBranchId == staffBranch.BranchId,
 
-                    CanReject = t.Status == TransferStatus.Pending &&
-                    t.FromBranchId == staffBranch.BranchId,
+                    CanReject =
+                        t.Status == TransferStatus.Pending &&
+                        t.FromBranchId == staffBranch.BranchId,
 
-                    CanReceive = t.Status == TransferStatus.InTransit &&
-                    t.ToBranchId == staffBranch.BranchId
+                    CanReceive =
+                        t.Status == TransferStatus.InTransit &&
+                        t.ToBranchId == staffBranch.BranchId
                 })
                 .ToListAsync();
 
-            return View(transfers);
+            var viewModel = new ItemTransfersViewModel
+            {
+                OutgoingRequests = transfers
+                    .Where(t =>
+                        t.ToBranchId == staffBranch.BranchId &&
+                        (t.Status == TransferStatus.Pending.ToString() ||
+                         t.Status == TransferStatus.InTransit.ToString()))
+                    .OrderByDescending(t => t.RequestedDate)
+                    .ToList(),
+
+                IncomingTransferRequests = transfers
+                    .Where(t =>
+                        t.FromBranchId == staffBranch.BranchId &&
+                        (t.Status == TransferStatus.Pending.ToString() ||
+                         t.Status == TransferStatus.InTransit.ToString()))
+                    .OrderByDescending(t => t.RequestedDate)
+                    .ToList(),
+
+                HistoricalTransfers = transfers
+                    .Where(t =>
+                        t.Status == TransferStatus.Completed.ToString() ||
+                        t.Status == TransferStatus.Rejected.ToString())
+                    .OrderByDescending(t => t.RequestedDate)
+                    .ToList()
+            };
+
+            return View(viewModel);
         }
 
         // GET: ItemTransfers/Create
