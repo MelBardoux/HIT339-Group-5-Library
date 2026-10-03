@@ -2,8 +2,9 @@
 {
     public enum TransferStatus
     {
-        Pending,
-        Completed,
-        Rejected
+        Pending = 0,
+        Completed = 1,
+        Rejected = 2,
+        InTransit = 3
     }
 }

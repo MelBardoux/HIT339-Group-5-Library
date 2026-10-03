@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace LibrarySystem.Models
 {
@@ -15,10 +15,13 @@ namespace LibrarySystem.Models
         public int ToBranchId { get; set; }
         public Branch ToBranch { get; set; } = null!;
 
+        public string RequestedByUserId { get; set; } = null!;
+        public IdentityUser RequestedByUser { get; set; } = null!;
+
         public TransferStatus Status { get; set; } = TransferStatus.Pending;
 
         public DateTime RequestedDate { get; set; } = DateTime.Now;
 
-        public DateTime? CompletedDate { get; set; } // nullable since a transfer request thats pending wont have a completion date
+        public DateTime? CompletedDate { get; set; }
     }
 }

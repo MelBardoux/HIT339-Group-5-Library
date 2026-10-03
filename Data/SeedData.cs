@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using LibrarySystem.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Data
 {
@@ -34,31 +35,132 @@ namespace LibrarySystem.Data
                 await userManager.AddToRoleAsync(admin, "Admin");
             }
 
-            // Seed Reception user
-            if (await userManager.FindByEmailAsync("reception@library.com") == null)
+            // Remove old global Reception and Manager accounts
+            var oldGlobalAccounts = new[]
             {
-                var reception = new IdentityUser
+    "reception@library.com",
+    "manager@library.com"
+};
+
+            foreach (var email in oldGlobalAccounts)
+            {
+                var oldUser = await userManager.FindByEmailAsync(email);
+
+                if (oldUser != null)
                 {
-                    UserName = "reception@library.com",
-                    Email = "reception@library.com",
-                    EmailConfirmed = true
-                };
-                await userManager.CreateAsync(reception, "Reception123!");
-                await userManager.AddToRoleAsync(reception, "Reception");
+                    var deleteResult = await userManager.DeleteAsync(oldUser);
+
+                    if (!deleteResult.Succeeded)
+                    {
+                        throw new InvalidOperationException(
+                            $"Failed to remove old global account: {email}");
+                    }
+                }
             }
 
-            // Seed Manager user
-            if (await userManager.FindByEmailAsync("manager@library.com") == null)
+            // Seed branch-specific staff accounts
+            var branchStaff = new[]
             {
-                var manager = new IdentityUser
+                new
                 {
-                    UserName = "manager@library.com",
-                    Email = "manager@library.com",
-                    EmailConfirmed = true
-                };
-                await userManager.CreateAsync(manager, "Manager123!");
-                await userManager.AddToRoleAsync(manager, "Manager");
+                    Email = "darwin.receptionists@email.com",
+                    Password = "Reception123!",
+                    Role = "Reception",
+                    BranchName = "Darwin"
+                },
+                new
+                {
+                    Email = "darwin.manager@email.com",
+                    Password = "Manager123!",
+                    Role = "Manager",
+                    BranchName = "Darwin"
+                },
+                new
+                {
+                    Email = "sydney.receptionists@email.com",
+                    Password = "Reception123!",
+                    Role = "Reception",
+                    BranchName = "Sydney"
+                },
+                new
+                {
+                    Email = "sydney.manager@email.com",
+                    Password = "Manager123!",
+                    Role = "Manager",
+                    BranchName = "Sydney"
+                },
+                new
+                {
+                    Email = "brisbane.receptionists@email.com",
+                    Password = "Reception123!",
+                    Role = "Reception",
+                    BranchName = "Brisbane"
+                },
+                new
+                {
+                    Email = "brisbane.manager@email.com",
+                    Password = "Manager123!",
+                    Role = "Manager",
+                    BranchName = "Brisbane"
+                }
+            };
+
+            foreach (var staff in branchStaff)
+            {
+                var user = await userManager.FindByEmailAsync(staff.Email);
+
+                if (user == null)
+                {
+                    user = new IdentityUser
+                    {
+                        UserName = staff.Email,
+                        Email = staff.Email,
+                        EmailConfirmed = true
+                    };
+
+                    var createResult = await userManager.CreateAsync(user, staff.Password);
+
+                    if (!createResult.Succeeded)
+                    {
+                        throw new InvalidOperationException(
+                            $"Failed to create branch account: {staff.Email}");
+                    }
+                }
+
+                if (!await userManager.IsInRoleAsync(user, staff.Role))
+                {
+                    var roleResult = await userManager.AddToRoleAsync(user, staff.Role);
+
+                    if (!roleResult.Succeeded)
+                    {
+                        throw new InvalidOperationException(
+                            $"Failed to assign role {staff.Role} to {staff.Email}");
+                    }
+                }
+
+                var branch = await context.Branches
+                    .FirstOrDefaultAsync(b => b.Name == staff.BranchName);
+
+                if (branch == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Branch '{staff.BranchName}' was not found.");
+                }
+
+                var existingAssignment = await context.StaffBranches
+                    .FirstOrDefaultAsync(sb => sb.UserId == user.Id);
+
+                if (existingAssignment == null)
+                {
+                    context.StaffBranches.Add(new StaffBranch
+                    {
+                        UserId = user.Id,
+                        BranchId = branch.Id
+                    });
+                }
             }
+
+            await context.SaveChangesAsync();
 
             // Seed Book Genres
             if (!context.BookGenres.Any())

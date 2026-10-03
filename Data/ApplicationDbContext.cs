@@ -17,6 +17,7 @@ namespace LibrarySystem.Data
         public DbSet<Branch> Branches {  get; set; } //Branch update for multi-location expansion
         public DbSet<ReceptionDesk> ReceptionDesks { get; set; } //ReceptionDesk update for reception desks in multi branch location feature
         public DbSet<ItemTransfer> ItemTransfers { get; set; } //ItemTransfers update for multi branch expansion
+        public DbSet<StaffBranch> StaffBranches { get; set; } // For staff branch-specific accounts
 
         public DbSet<Author> Authors { get; set; }
         public DbSet<BookGenre> BookGenres { get; set; }
@@ -66,6 +67,32 @@ namespace LibrarySystem.Data
                 .HasOne(t => t.ToBranch)
                 .WithMany()
                 .HasForeignKey(t => t.ToBranchId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // StaffBranch -> IdentityUser
+            modelBuilder.Entity<StaffBranch>()
+                .HasOne(sb => sb.User)
+                .WithMany()
+                .HasForeignKey(sb => sb.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // StaffBranch -> Branch
+            modelBuilder.Entity<StaffBranch>()
+                .HasOne(sb => sb.Branch)
+                .WithMany(b => b.StaffMembers)
+                .HasForeignKey(sb => sb.BranchId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Each staff user can belong to only one branch.
+            modelBuilder.Entity<StaffBranch>()
+                .HasIndex(sb => sb.UserId)
+                .IsUnique();
+
+            // ItemTransfer -> requesting Identity user
+            modelBuilder.Entity<ItemTransfer>()
+                .HasOne(t => t.RequestedByUser)
+                .WithMany()
+                .HasForeignKey(t => t.RequestedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
 

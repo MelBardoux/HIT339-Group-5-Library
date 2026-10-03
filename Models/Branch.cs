@@ -17,5 +17,6 @@ namespace LibrarySystem.Models
         public ICollection<Item> Items { get; set; } = new List<Item>();
 
         public ICollection<ReceptionDesk> ReceptionDesks { get; set; } = new List<ReceptionDesk>();
+        public ICollection<StaffBranch> StaffMembers { get; set; } = new List<StaffBranch>();
     }
 }
