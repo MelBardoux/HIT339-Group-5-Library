@@ -43,6 +43,35 @@ namespace LibrarySystem.Controllers.Api
                 .ToListAsync(); // intentionally keeping the other fields hidden from the public response
 
             return Ok(items);
+
         }
+
+        [HttpGet("categories")]
+        public async Task<ActionResult<CatalogueCategoriesDto>> GetCategories()
+        {
+            var result = new CatalogueCategoriesDto
+            {
+                BookGenres = await _context.BookGenres
+                    .AsNoTracking()
+                    .OrderBy(g => g.Name)
+                    .Select(g => g.Name)
+                    .ToListAsync(),
+
+                ToyTypes = await _context.ToyTypes
+                    .AsNoTracking()
+                    .OrderBy(t => t.Name)
+                    .Select(t => t.Name)
+                    .ToListAsync(),
+
+                MusicGenres = await _context.MusicGenres
+                    .AsNoTracking()
+                    .OrderBy(g => g.Name)
+                    .Select(g => g.Name)
+                    .ToListAsync()
+            };
+
+            return Ok(result);
+        }
+
     }
 }
