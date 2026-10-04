@@ -13,13 +13,17 @@ namespace LibrarySystem.Controllers.Api
     public class CatalogueController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CatalogueController(ApplicationDbContext context)
+        public CatalogueController(
+            ApplicationDbContext context,
+            IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
-        [HttpGet("items")]
+        [HttpGet("items")] // item endpoint
         public async Task<ActionResult<IEnumerable<CatalogueItemDto>>> GetItems()
         {
             var items = await _context.Items
@@ -46,7 +50,7 @@ namespace LibrarySystem.Controllers.Api
 
         }
 
-        [HttpGet("categories")]
+        [HttpGet("categories")] // categories endpoint
         public async Task<ActionResult<CatalogueCategoriesDto>> GetCategories()
         {
             var result = new CatalogueCategoriesDto
@@ -68,6 +72,30 @@ namespace LibrarySystem.Controllers.Api
                     .OrderBy(g => g.Name)
                     .Select(g => g.Name)
                     .ToListAsync()
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("status")] //status endpoint
+        public ActionResult<OperatingStatusDto> GetStatus()
+        {
+            var status = _configuration["LibraryStatus:Status"];
+            var message = _configuration["LibraryStatus:Message"];
+
+            if (string.IsNullOrWhiteSpace(status) ||
+                string.IsNullOrWhiteSpace(message))
+            {
+                return StatusCode(500, new
+                {
+                    message = "Library status configuration is missing."
+                });
+            }
+
+            var result = new OperatingStatusDto
+            {
+                Status = status,
+                Message = message
             };
 
             return Ok(result);
