@@ -1,0 +1,253 @@
+﻿@model LibrarySystem.ViewModels.ItemTransfersViewModel
+
+@{
+    ViewData["Title"] = "Item Transfers";
+}
+
+<h1>Item Transfers</h1>
+
+<div class="mb-4">
+    <a asp-controller="ItemTransfers"
+       asp-action="Create"
+       class="btn btn-primary">
+        New Transfer Request
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<!-- Requests Made by This Branch -->
+<div class="mb-5">
+    <h2>Requests Made by This Branch</h2>
+    <p class="text-muted">
+        Items requested from other library branches.
+    </p>
+
+    @if (!Model.OutgoingRequests.Any())
+    {
+        <div class="alert alert-info">
+            There are currently no active requests made by your branch.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Library Code</th>
+                        <th>Item</th>
+                        <th>From Branch</th>
+                        <th>To Branch</th>
+                        <th>Requested By</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th>Completed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var transfer in Model.OutgoingRequests)
+                    {
+                        <tr>
+                            <td>@transfer.ItemLibraryCode</td>
+                            <td>@transfer.ItemName</td>
+                            <td>@transfer.FromBranchName</td>
+                            <td>@transfer.ToBranchName</td>
+                            <td>@transfer.RequestedByUserEmail</td>
+                            <td>@transfer.Status</td>
+                            <td>@transfer.RequestedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @(transfer.CompletedDate.HasValue
+                                    ? transfer.CompletedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                    : "-")
+                            </td>
+                            <td>
+                                @if (transfer.CanReceive)
+                                {
+                                    <form asp-controller="ItemTransfers"
+                                          asp-action="Receive"
+                                          asp-route-id="@transfer.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-primary">
+                                            Receive
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No actions</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Incoming Transfer Requests -->
+<div class="mb-5">
+    <h2>Incoming Transfer Requests</h2>
+    <p class="text-muted">
+        Requests from other branches for items held by your branch.
+    </p>
+
+    @if (!Model.IncomingTransferRequests.Any())
+    {
+        <div class="alert alert-info">
+            There are currently no active incoming transfer requests.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Library Code</th>
+                        <th>Item</th>
+                        <th>From Branch</th>
+                        <th>To Branch</th>
+                        <th>Requested By</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th>Completed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var transfer in Model.IncomingTransferRequests)
+                    {
+                        <tr>
+                            <td>@transfer.ItemLibraryCode</td>
+                            <td>@transfer.ItemName</td>
+                            <td>@transfer.FromBranchName</td>
+                            <td>@transfer.ToBranchName</td>
+                            <td>@transfer.RequestedByUserEmail</td>
+                            <td>@transfer.Status</td>
+                            <td>@transfer.RequestedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @(transfer.CompletedDate.HasValue
+                                    ? transfer.CompletedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                    : "-")
+                            </td>
+                            <td>
+                                @if (transfer.CanApprove)
+                                {
+                                    <form asp-controller="ItemTransfers"
+                                          asp-action="Approve"
+                                          asp-route-id="@transfer.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success">
+                                            Approve
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (transfer.CanReject)
+                                {
+                                    <form asp-controller="ItemTransfers"
+                                          asp-action="Reject"
+                                          asp-route-id="@transfer.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger">
+                                            Reject
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (!transfer.CanApprove &&
+                                     !transfer.CanReject)
+                                {
+                                    <span class="text-muted">No actions</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Transfer History -->
+<div class="mb-5">
+    <h2>Transfer History</h2>
+    <p class="text-muted">
+        Completed and rejected transfer requests involving your branch.
+    </p>
+
+    @if (!Model.HistoricalTransfers.Any())
+    {
+        <div class="alert alert-info">
+            There is currently no transfer history.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Library Code</th>
+                        <th>Item</th>
+                        <th>From Branch</th>
+                        <th>To Branch</th>
+                        <th>Requested By</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th>Completed</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var transfer in Model.HistoricalTransfers)
+                    {
+                        <tr>
+                            <td>@transfer.ItemLibraryCode</td>
+                            <td>@transfer.ItemName</td>
+                            <td>@transfer.FromBranchName</td>
+                            <td>@transfer.ToBranchName</td>
+                            <td>@transfer.RequestedByUserEmail</td>
+                            <td>@transfer.Status</td>
+                            <td>@transfer.RequestedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @(transfer.CompletedDate.HasValue
+                                    ? transfer.CompletedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                    : "-")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

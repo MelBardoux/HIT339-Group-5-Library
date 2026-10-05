@@ -1,0 +1,63 @@
+﻿@model LibrarySystem.ViewModels.BranchInventoryViewModel // Page now expects the viewmodel BranchInventoryViewModel
+
+@{
+    ViewData["Title"] = "Branch Inventory";
+}
+
+<h1>Branch Inventory</h1>
+
+<form asp-controller="Branches" asp-action="Inventory" method="get" class="mb-4">
+    <div class="form-group">
+        <label for="branchId">View inventory for:</label>
+
+        <select id="branchId"
+                name="branchId"
+                class="form-select"
+                onchange="this.form.submit()">
+
+            <option value="">All Branches</option>
+
+            @foreach (var branch in Model.Branches)
+            {
+                <option value="@branch.Id"
+                        selected="@(Model.SelectedBranchId == branch.Id)">
+                    @branch.Name
+                </option>
+            }
+        </select>
+    </div>
+</form>
+
+@if (!Model.Items.Any())
+{
+    <p>No inventory items were found for the selected branch.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Library Code</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Branch</th>
+                <th>On Order</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.LibraryCode</td>
+                    <td>@item.Name</td>
+                    <td>@item.Type</td>
+                    <td>@item.Status</td>
+                    <td>@item.BranchName</td>
+                    <td>@(item.OnOrder ? "Yes" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

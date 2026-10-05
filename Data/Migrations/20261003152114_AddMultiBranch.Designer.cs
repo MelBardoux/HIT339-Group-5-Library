@@ -4,6 +4,7 @@ using LibrarySystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibrarySystem.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261003152114_AddMultiBranch")]
+    partial class AddMultiBranch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,10 +242,6 @@ namespace LibrarySystem.Data.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<string>("RequestedByUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("RequestedDate")
                         .HasColumnType("datetime2");
 
@@ -257,8 +256,6 @@ namespace LibrarySystem.Data.Migrations
                     b.HasIndex("FromBranchId");
 
                     b.HasIndex("ItemId");
-
-                    b.HasIndex("RequestedByUserId");
 
                     b.HasIndex("ToBranchId");
 
@@ -355,31 +352,6 @@ namespace LibrarySystem.Data.Migrations
                     b.HasIndex("BranchId");
 
                     b.ToTable("ReceptionDesks");
-                });
-
-            modelBuilder.Entity("LibrarySystem.Models.StaffBranch", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BranchId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("StaffBranches");
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.ToyType", b =>
@@ -762,12 +734,6 @@ namespace LibrarySystem.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "RequestedByUser")
-                        .WithMany()
-                        .HasForeignKey("RequestedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LibrarySystem.Models.Branch", "ToBranch")
                         .WithMany()
                         .HasForeignKey("ToBranchId")
@@ -777,8 +743,6 @@ namespace LibrarySystem.Data.Migrations
                     b.Navigation("FromBranch");
 
                     b.Navigation("Item");
-
-                    b.Navigation("RequestedByUser");
 
                     b.Navigation("ToBranch");
                 });
@@ -811,25 +775,6 @@ namespace LibrarySystem.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Branch");
-                });
-
-            modelBuilder.Entity("LibrarySystem.Models.StaffBranch", b =>
-                {
-                    b.HasOne("LibrarySystem.Models.Branch", "Branch")
-                        .WithMany("StaffMembers")
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Branch");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -944,8 +889,6 @@ namespace LibrarySystem.Data.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("ReceptionDesks");
-
-                    b.Navigation("StaffMembers");
                 });
 #pragma warning restore 612, 618
         }
