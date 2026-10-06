@@ -27,6 +27,7 @@ namespace LibrarySystem.Data
         public DbSet<MusicFormat> MusicFormats { get; set; }
         public DbSet<Borrower> Borrowers { get; set; }
         public DbSet<Loan> Loans { get; set; }
+        public DbSet<Notification> Notifications { get; set; } // Simulated Email/SMS notification log
 
 
         // OnModelCreating method to configure the multi-branch relationships
@@ -94,6 +95,16 @@ namespace LibrarySystem.Data
                 .WithMany()
                 .HasForeignKey(t => t.RequestedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Notification -> Borrower (deleting a borrower deletes their notification history)
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Borrower)
+                .WithMany()
+                .HasForeignKey(n => n.BorrowerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => new { n.LoanId, n.Type, n.SentAt });
         }
 
     }

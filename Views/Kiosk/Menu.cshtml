@@ -1,0 +1,11 @@
+@model LibrarySystem.ViewModels.KioskBorrowerViewModel
+@{
+    ViewData["Title"] = "Menu";
+}
+<partial name="_BorrowerBanner" model="Model" />
+
+<a asp-action="Checkout" asp-route-card="@Model.LibraryCard"
+   class="btn btn-success kiosk-btn @(Model.CanBorrow ? "" : "disabled")">📖 Borrow items</a>
+
+<a asp-action="Account" asp-route-card="@Model.LibraryCard"
+   class="btn btn-primary kiosk-btn">👤 My account</a>

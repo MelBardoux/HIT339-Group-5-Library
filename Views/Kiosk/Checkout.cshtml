@@ -1,0 +1,50 @@
+@model LibrarySystem.ViewModels.KioskCheckoutViewModel
+@{
+    ViewData["Title"] = "Borrow";
+}
+<partial name="_BorrowerBanner" model="Model.Borrower" />
+
+@if (TempData["KioskSuccess"] != null)
+{
+    <div class="alert alert-success fs-4">@TempData["KioskSuccess"]</div>
+}
+@if (TempData["KioskError"] != null)
+{
+    <div class="alert alert-danger fs-5">@TempData["KioskError"]</div>
+}
+
+@if (Model.Borrower.CanBorrow)
+{
+    <form asp-action="Checkout" method="post" class="kiosk-card">
+        <input type="hidden" name="card" value="@Model.Borrower.LibraryCard" />
+        <label for="itemCode" class="form-label fs-4">Scan the barcode on the item</label>
+        <input id="itemCode" name="itemCode" class="form-control kiosk-input mb-4"
+               placeholder="BKS-0001" autocomplete="off" autofocus required />
+        <button type="submit" class="btn btn-success kiosk-btn">Check out</button>
+    </form>
+}
+
+<div class="kiosk-card">
+    <h2 class="fs-3 mb-3">Checked out today</h2>
+    @if (!Model.CheckedOutToday.Any())
+    {
+        <p class="text-muted mb-0">Nothing yet - scan an item to start.</p>
+    }
+    else
+    {
+        <ul class="list-group list-group-flush">
+            @foreach (var loan in Model.CheckedOutToday)
+            {
+                <li class="list-group-item d-flex justify-content-between flex-wrap">
+                    <span><strong>@loan.ItemName</strong> <small class="text-muted">@loan.LibraryCode · @loan.ItemType</small></span>
+                    <span>Due @loan.DueDate.ToString("dd/MM/yyyy")</span>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+<div class="d-flex gap-3">
+    <a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-outline-primary btn-lg-touch flex-fill">Back</a>
+    <a asp-action="Index" class="btn btn-primary btn-lg-touch flex-fill">Done</a>
+</div>

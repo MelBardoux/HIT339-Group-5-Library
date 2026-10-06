@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"] - Library Kiosk</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body { background: #f2f5f9; font-size: 1.35rem; min-height: 100vh; user-select: none; }
+        .kiosk-header { background: #1f3b5c; color: #fff; padding: 1rem 2rem; }
+        .kiosk-header a { color: #fff; text-decoration: none; }
+        .kiosk-main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .kiosk-btn { display: block; width: 100%; padding: 2rem 1rem; font-size: 1.8rem; font-weight: 600;
+                     border-radius: 1rem; margin-bottom: 1.25rem; }
+        .kiosk-input { font-size: 2rem; padding: 1rem; text-align: center; text-transform: uppercase;
+                       letter-spacing: .15rem; border-radius: 1rem; }
+        .kiosk-card { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+                      margin-bottom: 1.5rem; }
+        .btn-lg-touch { min-height: 64px; font-size: 1.4rem; border-radius: .8rem; padding: .75rem 2rem; }
+        .kiosk-timeout { font-size: 1rem; opacity: .8; }
+    </style>
+</head>
+<body>
+    <div class="kiosk-header d-flex justify-content-between align-items-center">
+        <a asp-controller="Kiosk" asp-action="Index" class="fs-3 fw-bold">📚 Library Self-Service</a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="kiosk-timeout" id="kiosk-timer"></span>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-light">Exit kiosk</a>
+        </div>
+    </div>
+
+    <main class="kiosk-main">
+        @RenderBody()
+    </main>
+
+    <script>
+        // Return to the welcome screen after 60 seconds without a touch or key press,
+        // so the next patron never sees the previous patron's account.
+        (function () {
+            const onWelcome = window.location.pathname.toLowerCase().replace(/\/$/, '').endsWith('/kiosk') ||
+                              window.location.pathname.toLowerCase().endsWith('/kiosk/index');
+            if (onWelcome) return;
+
+            const limit = 60;
+            let remaining = limit;
+            const label = document.getElementById('kiosk-timer');
+            const reset = () => remaining = limit;
+            ['click', 'touchstart', 'keydown', 'mousemove'].forEach(e => document.addEventListener(e, reset));
+
+            setInterval(() => {
+                remaining--;
+                if (remaining <= 15) label.textContent = `Logging out in ${remaining}s`;
+                else label.textContent = '';
+                if (remaining <= 0) window.location.href = '@Url.Action("Index", "Kiosk")';
+            }, 1000);
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

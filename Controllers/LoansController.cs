@@ -1,5 +1,6 @@
 ﻿using LibrarySystem.Data;
 using LibrarySystem.Models;
+using LibrarySystem.Services;
 using LibrarySystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace LibrarySystem.Controllers
     public class LoansController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notifications;
 
-        public LoansController(ApplicationDbContext context)
+        public LoansController(ApplicationDbContext context, INotificationService notifications)
         {
             _context = context;
+            _notifications = notifications;
         }
 
         // GET: Loans
@@ -154,6 +157,7 @@ namespace LibrarySystem.Controllers
 
             var today = DateOnly.FromDateTime(DateTime.Now);
             var dueDate = today.AddDays(14);
+            var newLoans = new List<Loan>();
 
             foreach (var code in viewModel.LibraryCodes ?? new List<string>())
             {
@@ -176,16 +180,27 @@ namespace LibrarySystem.Controllers
                 var loan = new Loan
                 {
                     ItemId = item.Id,
+                    Item = item,
                     BorrowerId = confirmedBorrower.Id,
+                    Borrower = confirmedBorrower,
                     BorrowedDate = today,
                     DueDate = dueDate
                 };
 
                 item.Status = ItemStatus.Borrowed;
                 _context.Loans.Add(loan);
+                newLoans.Add(loan);
             }
 
             await _context.SaveChangesAsync();
+
+            // Send a simulated Email + SMS for each item borrowed (loans now have Ids)
+            foreach (var loan in newLoans)
+            {
+                _notifications.NotifyItemBorrowed(loan);
+            }
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -295,6 +310,7 @@ namespace LibrarySystem.Controllers
             if (fine > 0)
             {
                 loan.Borrower.Status = BorrowerStatus.Suspended;
+                _notifications.NotifyFineCharged(loan);
             }
 
             await _context.SaveChangesAsync();

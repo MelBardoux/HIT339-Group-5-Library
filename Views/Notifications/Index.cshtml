@@ -1,0 +1,107 @@
+@model LibrarySystem.ViewModels.NotificationIndexViewModel
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Notification Log</h1>
+    <form asp-action="RunCheck" method="post">
+        <button type="submit" class="btn btn-primary">Run due-date check now</button>
+    </form>
+</div>
+
+<p class="text-muted">
+    Simulated Email and SMS messages sent to borrowers when items are borrowed, nearing their due date,
+    overdue, fined, or ready after a reservation. Due-date reminders also run automatically every hour.
+</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card text-center"><div class="card-body">
+        <div class="fs-3 fw-bold">@Model.TotalCount</div><div class="text-muted">Total sent</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center"><div class="card-body">
+        <div class="fs-3 fw-bold">@Model.TodayCount</div><div class="text-muted">Sent today</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center"><div class="card-body">
+        <div class="fs-3 fw-bold">@Model.EmailCount</div><div class="text-muted">Emails</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center"><div class="card-body">
+        <div class="fs-3 fw-bold">@Model.SmsCount</div><div class="text-muted">SMS</div></div></div></div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="search" value="@Model.Search" class="form-control"
+               placeholder="Borrower name, card (BRW-0001) or item code" />
+    </div>
+    <div class="col-md-3">
+        <select name="type" class="form-select">
+            <option value="">All types</option>
+            @foreach (var t in Enum.GetValues<NotificationType>())
+            {
+                <option value="@t" selected="@(Model.TypeFilter == t)">@t</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="channel" class="form-select">
+            <option value="">All channels</option>
+            @foreach (var c in Enum.GetValues<NotificationChannel>())
+            {
+                <option value="@c" selected="@(Model.ChannelFilter == c)">@c</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
+@if (!Model.Notifications.Any())
+{
+    <div class="alert alert-info">No notifications yet. Borrow an item or click "Run due-date check now".</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Sent</th>
+                    <th>Channel</th>
+                    <th>Type</th>
+                    <th>Borrower</th>
+                    <th>To</th>
+                    <th>Item</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var n in Model.Notifications)
+                {
+                    var badge = n.Type switch
+                    {
+                        NotificationType.ItemBorrowed => "bg-primary",
+                        NotificationType.DueSoon => "bg-warning text-dark",
+                        NotificationType.Overdue => "bg-danger",
+                        NotificationType.FineCharged => "bg-danger",
+                        NotificationType.ItemAvailable => "bg-success",
+                        _ => "bg-secondary"
+                    };
+                    <tr>
+                        <td class="text-nowrap">@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@(n.Channel == NotificationChannel.Email ? "✉ Email" : "📱 SMS")</td>
+                        <td><span class="badge @badge">@n.Type</span></td>
+                        <td>@n.Borrower.Name<br /><small class="text-muted">@n.Borrower.LibraryCard</small></td>
+                        <td><small>@n.Recipient</small></td>
+                        <td>@n.ItemLibraryCode</td>
+                        <td><strong>@n.Subject</strong><br /><small>@n.Message</small></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Welcome";
+}
+<div class="text-center mt-4">
+    <h1 class="display-4 fw-bold mb-3">Welcome</h1>
+    <p class="fs-4 text-muted mb-5">Scan your library card to begin, or type the number below.</p>
+
+    @if (TempData["KioskError"] != null)
+    {
+        <div class="alert alert-danger fs-5">@TempData["KioskError"]</div>
+    }
+
+    <form asp-action="Index" method="post" class="kiosk-card">
+        <label for="libraryCard" class="form-label fs-4">Library card</label>
+        <input id="libraryCard" name="libraryCard" class="form-control kiosk-input mb-4"
+               placeholder="BRW-0001" autocomplete="off" autofocus required />
+        <button type="submit" class="btn btn-primary kiosk-btn">Continue</button>
+    </form>
+</div>
