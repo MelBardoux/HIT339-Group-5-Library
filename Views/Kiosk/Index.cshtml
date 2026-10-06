@@ -1,19 +1,23 @@
 @{
     ViewData["Title"] = "Welcome";
 }
-<div class="text-center mt-4">
-    <h1 class="display-4 fw-bold mb-3">Welcome</h1>
-    <p class="fs-4 text-muted mb-5">Scan your library card to begin, or type the number below.</p>
+<div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 500;">Welcome</h1>
+    <p class="lead text-muted">Scan your library card to begin, or type the number below.</p>
+</div>
 
-    @if (TempData["KioskError"] != null)
-    {
-        <div class="alert alert-danger fs-5">@TempData["KioskError"]</div>
-    }
+@if (TempData["KioskError"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["KioskError"]</div>
+}
 
-    <form asp-action="Index" method="post" class="kiosk-card">
-        <label for="libraryCard" class="form-label fs-4">Library card</label>
-        <input id="libraryCard" name="libraryCard" class="form-control kiosk-input mb-4"
-               placeholder="BRW-0001" autocomplete="off" autofocus required />
-        <button type="submit" class="btn btn-primary kiosk-btn">Continue</button>
-    </form>
+<div class="card border-primary home-card mx-auto" style="max-width: 560px;">
+    <div class="card-body p-4 text-center">
+        <h5 class="card-title text-primary mb-3" style="font-weight: 600;">Library card</h5>
+        <form asp-action="Index" method="post">
+            <input id="libraryCard" name="libraryCard" class="form-control kiosk-input mb-3"
+                   placeholder="e.g. BRW-0001" autocomplete="off" autofocus required />
+            <button type="submit" class="btn btn-primary btn-touch w-100">Continue</button>
+        </form>
+    </div>
 </div>

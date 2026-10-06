@@ -2,44 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Library Kiosk</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
-        body { background: #f2f5f9; font-size: 1.35rem; min-height: 100vh; user-select: none; }
-        .kiosk-header { background: #1f3b5c; color: #fff; padding: 1rem 2rem; }
-        .kiosk-header a { color: #fff; text-decoration: none; }
-        .kiosk-main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-        .kiosk-btn { display: block; width: 100%; padding: 2rem 1rem; font-size: 1.8rem; font-weight: 600;
-                     border-radius: 1rem; margin-bottom: 1.25rem; }
-        .kiosk-input { font-size: 2rem; padding: 1rem; text-align: center; text-transform: uppercase;
-                       letter-spacing: .15rem; border-radius: 1rem; }
-        .kiosk-card { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.08);
-                      margin-bottom: 1.5rem; }
-        .btn-lg-touch { min-height: 64px; font-size: 1.4rem; border-radius: .8rem; padding: .75rem 2rem; }
-        .kiosk-timeout { font-size: 1rem; opacity: .8; }
+        /* Same look as the home page cards, with bigger touch targets for a kiosk screen */
+        .home-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .home-card:hover { transform: translateY(-4px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        .kiosk-input { font-size: 1.5rem; padding: .9rem; text-align: center; text-transform: uppercase; letter-spacing: .1rem; }
+        .kiosk-input::placeholder { text-transform: none; letter-spacing: normal; }
+        .btn-touch { min-height: 56px; font-size: 1.2rem; }
+        .kiosk-timeout { font-size: .9rem; }
     </style>
 </head>
 <body>
-    <div class="kiosk-header d-flex justify-content-between align-items-center">
-        <a asp-controller="Kiosk" asp-action="Index" class="fs-3 fw-bold">📚 Library Self-Service</a>
-        <div class="d-flex align-items-center gap-3">
-            <span class="kiosk-timeout" id="kiosk-timer"></span>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-light">Exit kiosk</a>
-        </div>
-    </div>
+    <header>
+        <nav class="navbar navbar-light bg-white border-bottom box-shadow mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Kiosk" asp-action="Index">Library Self-Service</a>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="kiosk-timeout text-muted" id="kiosk-timer"></span>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary">Exit kiosk</a>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-    <main class="kiosk-main">
-        @RenderBody()
-    </main>
+    <div class="container" style="max-width: 900px;">
+        <main role="main" class="pb-5">
+            @RenderBody()
+        </main>
+    </div>
 
     <script>
         // Return to the welcome screen after 60 seconds without a touch or key press,
         // so the next patron never sees the previous patron's account.
         (function () {
-            const onWelcome = window.location.pathname.toLowerCase().replace(/\/$/, '').endsWith('/kiosk') ||
-                              window.location.pathname.toLowerCase().endsWith('/kiosk/index');
-            if (onWelcome) return;
+            const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+            if (path.endsWith('/kiosk') || path.endsWith('/kiosk/index')) return;
 
             const limit = 60;
             let remaining = limit;
@@ -49,8 +50,7 @@
 
             setInterval(() => {
                 remaining--;
-                if (remaining <= 15) label.textContent = `Logging out in ${remaining}s`;
-                else label.textContent = '';
+                label.textContent = remaining <= 15 ? `Logging out in ${remaining}s` : '';
                 if (remaining <= 0) window.location.href = '@Url.Action("Index", "Kiosk")';
             }, 1000);
         })();

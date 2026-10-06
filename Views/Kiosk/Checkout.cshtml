@@ -6,45 +6,51 @@
 
 @if (TempData["KioskSuccess"] != null)
 {
-    <div class="alert alert-success fs-4">@TempData["KioskSuccess"]</div>
+    <div class="alert alert-success fs-5">@TempData["KioskSuccess"]</div>
 }
 @if (TempData["KioskError"] != null)
 {
-    <div class="alert alert-danger fs-5">@TempData["KioskError"]</div>
+    <div class="alert alert-danger">@TempData["KioskError"]</div>
 }
 
 @if (Model.Borrower.CanBorrow)
 {
-    <form asp-action="Checkout" method="post" class="kiosk-card">
-        <input type="hidden" name="card" value="@Model.Borrower.LibraryCard" />
-        <label for="itemCode" class="form-label fs-4">Scan the barcode on the item</label>
-        <input id="itemCode" name="itemCode" class="form-control kiosk-input mb-4"
-               placeholder="BKS-0001" autocomplete="off" autofocus required />
-        <button type="submit" class="btn btn-success kiosk-btn">Check out</button>
-    </form>
+    <div class="card border-primary mb-4">
+        <div class="card-body p-4 text-center">
+            <h5 class="card-title text-primary mb-3" style="font-weight: 600;">Scan the barcode on the item</h5>
+            <form asp-action="Checkout" method="post">
+                <input type="hidden" name="card" value="@Model.Borrower.LibraryCard" />
+                <input id="itemCode" name="itemCode" class="form-control kiosk-input mb-3"
+                       placeholder="e.g. BKS-0005" autocomplete="off" autofocus required />
+                <button type="submit" class="btn btn-primary btn-touch w-100">Check out</button>
+            </form>
+        </div>
+    </div>
 }
 
-<div class="kiosk-card">
-    <h2 class="fs-3 mb-3">Checked out today</h2>
-    @if (!Model.CheckedOutToday.Any())
-    {
-        <p class="text-muted mb-0">Nothing yet - scan an item to start.</p>
-    }
-    else
-    {
-        <ul class="list-group list-group-flush">
-            @foreach (var loan in Model.CheckedOutToday)
-            {
-                <li class="list-group-item d-flex justify-content-between flex-wrap">
-                    <span><strong>@loan.ItemName</strong> <small class="text-muted">@loan.LibraryCode · @loan.ItemType</small></span>
-                    <span>Due @loan.DueDate.ToString("dd/MM/yyyy")</span>
-                </li>
-            }
-        </ul>
-    }
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="text-primary mb-3" style="font-weight: 600;">Checked out today</h5>
+        @if (!Model.CheckedOutToday.Any())
+        {
+            <p class="text-muted mb-0">Nothing yet - scan an item to start.</p>
+        }
+        else
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var loan in Model.CheckedOutToday)
+                {
+                    <li class="list-group-item d-flex justify-content-between flex-wrap">
+                        <span><strong>@loan.ItemName</strong> <small class="text-muted">@loan.LibraryCode · @loan.ItemType</small></span>
+                        <span>Due @loan.DueDate.ToString("dd/MM/yyyy")</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
 </div>
 
 <div class="d-flex gap-3">
-    <a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-outline-primary btn-lg-touch flex-fill">Back</a>
-    <a asp-action="Index" class="btn btn-primary btn-lg-touch flex-fill">Done</a>
+    <a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-outline-primary btn-touch flex-fill">Back</a>
+    <a asp-action="Index" class="btn btn-primary btn-touch flex-fill">Done</a>
 </div>
