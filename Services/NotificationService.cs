@@ -129,5 +129,55 @@ namespace LibrarySystem.Services
             await _context.SaveChangesAsync();
             return sent;
         }
+
+        /// Checks for reservations past the 48-hour pickup window.
+        /// Expired reservations are marked as such, and the next borrower in the queue is promoted.
+        public async Task<int> RunReservationExpiryCheckAsync()
+        {
+            var now = DateTime.Now;
+            int processed = 0;
+
+            // Find all Ready reservations that have passed their expiry time
+            var expiredReservations = await _context.Reservations
+                .Include(r => r.Item)
+                .Include(r => r.Borrower)
+                .Where(r => r.Status == ReservationStatus.Ready && r.ExpiresAt != null && r.ExpiresAt <= now)
+                .ToListAsync();
+
+            foreach (var expired in expiredReservations)
+            {
+                expired.Status = ReservationStatus.Expired;
+                expired.Item.ReservedForBorrowerId = null;
+
+                // Find the next waiting borrower in the queue for this item
+                var next = await _context.Reservations
+                    .Include(r => r.Borrower)
+                    .Where(r => r.ItemId == expired.ItemId && r.Status == ReservationStatus.Waiting)
+                    .OrderBy(r => r.QueuePosition)
+                    .FirstOrDefaultAsync();
+
+                if (next != null)
+                {
+                    next.Status = ReservationStatus.Ready;
+                    next.NotifiedAt = now;
+                    next.ExpiresAt = now.AddHours(48);
+                    expired.Item.Status = ItemStatus.Reserved;
+                    expired.Item.ReservedForBorrowerId = next.BorrowerId;
+                    NotifyItemAvailable(next.Borrower, expired.Item);
+                }
+                else
+                {
+                    // No one else waiting, item becomes available
+                    expired.Item.Status = ItemStatus.Available;
+                }
+
+                processed++;
+            }
+
+            if (processed > 0)
+                await _context.SaveChangesAsync();
+
+            return processed;
+        }
     }
 }
