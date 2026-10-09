@@ -28,6 +28,7 @@ namespace LibrarySystem.Data
         public DbSet<Borrower> Borrowers { get; set; }
         public DbSet<Loan> Loans { get; set; }
         public DbSet<Notification> Notifications { get; set; } // Simulated Email/SMS notification log
+        public DbSet<Reservation> Reservations { get; set; } // Waitlist queue for reserved items
 
 
         // OnModelCreating method to configure the multi-branch relationships
@@ -105,6 +106,24 @@ namespace LibrarySystem.Data
 
             modelBuilder.Entity<Notification>()
                 .HasIndex(n => new { n.LoanId, n.Type, n.SentAt });
+
+            // Reservation -> Item
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.Item)
+                .WithMany()
+                .HasForeignKey(r => r.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Reservation -> Borrower
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.Borrower)
+                .WithMany()
+                .HasForeignKey(r => r.BorrowerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Index for efficient queue lookups: find waiting reservations for an item, ordered by position
+            modelBuilder.Entity<Reservation>()
+                .HasIndex(r => new { r.ItemId, r.Status, r.QueuePosition });
         }
 
     }
