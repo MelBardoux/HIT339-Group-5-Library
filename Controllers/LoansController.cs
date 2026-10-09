@@ -123,6 +123,12 @@ namespace LibrarySystem.Controllers
                     }
                     else
                     {
+                        // Check if this borrower has a ready reservation for this item
+                        var hasReadyReservation = await _context.Reservations
+                            .AnyAsync(r => r.ItemId == item.Id
+                                        && r.BorrowerId == borrower.Id
+                                        && r.Status == ReservationStatus.Ready);
+
                         viewModel.ItemResults.Add(new ItemLookupResult
                         {
                             Id = item.Id,
@@ -130,8 +136,7 @@ namespace LibrarySystem.Controllers
                             Name = item.Name,
                             Type = item.GetType().Name,
                             Status = item.Status.ToString(),
-                            IsAvailable = item.Status == ItemStatus.Available ||
-                                          (item.Status == ItemStatus.Reserved && item.ReservedForBorrowerId == borrower.Id)
+                            IsAvailable = item.Status == ItemStatus.Available || hasReadyReservation
                         });
                     }
                 }
@@ -168,11 +173,16 @@ namespace LibrarySystem.Controllers
 
                 if (item == null) continue;
 
-                if (item.Status == ItemStatus.Reserved && item.ReservedForBorrowerId == confirmedBorrower.Id)
+                // Mark the reservation as collected if one exists
+                var borrowReservation = await _context.Reservations
+                    .FirstOrDefaultAsync(r => r.ItemId == item.Id
+                                           && r.BorrowerId == confirmedBorrower.Id
+                                           && r.Status == ReservationStatus.Ready);
+                if (borrowReservation != null)
                 {
-                    item.ReservedForBorrowerId = null;
+                    borrowReservation.Status = ReservationStatus.Collected;
                 }
-                else if (item.Status != ItemStatus.Available)
+                else if (item.Status != ItemStatus.Available && borrowReservation == null)
                 {
                     continue;
                 }
@@ -246,7 +256,8 @@ namespace LibrarySystem.Controllers
         public async Task<IActionResult> Reserve(LoanReserveViewModel viewModel)
         {
             var item = await _context.Items
-                .FirstOrDefaultAsync(i => i.LibraryCode == viewModel.ItemLibraryCode);
+    .Include(i => i.Branch)
+    .FirstOrDefaultAsync(i => i.LibraryCode == viewModel.ItemLibraryCode);
 
             var borrower = await _context.Borrowers
                 .FirstOrDefaultAsync(b => b.LibraryCard == viewModel.BorrowerLibraryCard);
@@ -340,9 +351,9 @@ namespace LibrarySystem.Controllers
         public async Task<IActionResult> Return(int id, LoanReturnViewModel viewModel)
         {
             var loan = await _context.Loans
-                .Include(l => l.Item)
-                .Include(l => l.Borrower)
-                .FirstOrDefaultAsync(l => l.Id == id);
+    .Include(l => l.Item).ThenInclude(i => i.Branch)
+    .Include(l => l.Borrower)
+    .FirstOrDefaultAsync(l => l.Id == id);
 
             if (loan == null || loan.ReturnedDate != null) return NotFound();
 

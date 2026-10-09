@@ -69,11 +69,13 @@ namespace LibrarySystem.Services
                 loan.Item, loan.Id);
         }
 
+        // Notifies a borrower that their reserved item is ready for collection
         public void NotifyItemAvailable(Borrower borrower, Item item)
         {
+            var branchName = item.Branch?.Name ?? "your local branch";
             Send(borrower, NotificationType.ItemAvailable,
                 "Your reserved item is ready",
-                $"Hi {borrower.Name}, {item.Name} ({item.LibraryCode}) is now available and is being held for you.",
+                $"Hi {borrower.Name}, {item.Name} ({item.LibraryCode}) is now available at {branchName} and is being held for you. Please collect within 48 hours.",
                 item);
         }
 
@@ -139,8 +141,8 @@ namespace LibrarySystem.Services
 
             // Find all Ready reservations that have passed their expiry time
             var expiredReservations = await _context.Reservations
-                .Include(r => r.Item)
-                .Include(r => r.Borrower)
+    .Include(r => r.Item).ThenInclude(i => i.Branch)
+    .Include(r => r.Borrower)
                 .Where(r => r.Status == ReservationStatus.Ready && r.ExpiresAt != null && r.ExpiresAt <= now)
                 .ToListAsync();
 
