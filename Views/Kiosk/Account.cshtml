@@ -1,0 +1,85 @@
+@model LibrarySystem.ViewModels.KioskAccountViewModel
+@{
+    ViewData["Title"] = "My Account";
+}
+<partial name="_BorrowerBanner" model="Model.Borrower" />
+
+<div class="row text-center mb-2">
+    <div class="col-4 mb-3">
+        <div class="card h-100 border-primary"><div class="card-body py-3">
+            <h6 class="text-primary" style="font-weight: 600;">On loan</h6>
+            <p class="display-6 text-primary mb-0">@Model.CurrentLoans.Count</p>
+        </div></div>
+    </div>
+    <div class="col-4 mb-3">
+        <div class="card h-100 border-primary"><div class="card-body py-3">
+            <h6 class="text-primary" style="font-weight: 600;">Overdue</h6>
+            <p class="display-6 text-danger mb-0">@Model.CurrentLoans.Count(l => l.IsOverdue)</p>
+        </div></div>
+    </div>
+    <div class="col-4 mb-3">
+        <div class="card h-100 border-primary"><div class="card-body py-3">
+            <h6 class="text-primary" style="font-weight: 600;">Fines owing</h6>
+            <p class="display-6 text-primary mb-0">@Model.Borrower.OutstandingFines.ToString("C")</p>
+        </div></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="text-primary mb-3" style="font-weight: 600;">Items on loan</h5>
+        @if (!Model.CurrentLoans.Any())
+        {
+            <p class="text-muted mb-0">You have no items on loan.</p>
+        }
+        else
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var loan in Model.CurrentLoans)
+                {
+                    <li class="list-group-item d-flex justify-content-between flex-wrap @(loan.IsOverdue ? "list-group-item-danger" : loan.DaysLeft <= 2 ? "list-group-item-warning" : "")">
+                        <span><strong>@loan.ItemName</strong> <small class="text-muted">@loan.LibraryCode</small></span>
+                        <span>
+                            @if (loan.IsOverdue) { <text>Overdue by @(-loan.DaysLeft) day(s)</text> }
+                            else if (loan.DaysLeft == 0) { <text>Due today</text> }
+                            else { <text>Due @loan.DueDate.ToString("dd/MM/yyyy") (@loan.DaysLeft days)</text> }
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>
+
+@if (Model.UnpaidFines.Any())
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="text-primary mb-3" style="font-weight: 600;">Unpaid fines</h5>
+            <ul class="list-group list-group-flush">
+                @foreach (var f in Model.UnpaidFines)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@f.ItemName <small class="text-muted">@f.LibraryCode</small></span>
+                        <strong>@(f.Fine?.ToString("C"))</strong>
+                    </li>
+                }
+            </ul>
+            <p class="mt-3 mb-0 text-muted">Fines can be paid at the front desk.</p>
+        </div>
+    </div>
+}
+
+@if (Model.ReservedItems.Any())
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="text-primary mb-3" style="font-weight: 600;">Reservations</h5>
+            <ul class="list-group list-group-flush">
+                @foreach (var r in Model.ReservedItems) { <li class="list-group-item">@r</li> }
+            </ul>
+        </div>
+    </div>
+}
+
+<a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-outline-primary btn-touch w-100">Back</a>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Library Kiosk</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* Same look as the home page cards, with bigger touch targets for a kiosk screen */
+        .home-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .home-card:hover { transform: translateY(-4px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        .kiosk-input { font-size: 1.5rem; padding: .9rem; text-align: center; text-transform: uppercase; letter-spacing: .1rem; }
+        .kiosk-input::placeholder { text-transform: none; letter-spacing: normal; }
+        .btn-touch { min-height: 56px; font-size: 1.2rem; }
+        .kiosk-timeout { font-size: .9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-light bg-white border-bottom box-shadow mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Kiosk" asp-action="Index">Library Self-Service</a>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="kiosk-timeout text-muted" id="kiosk-timer"></span>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary">Exit kiosk</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container" style="max-width: 900px;">
+        <main role="main" class="pb-5">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        // Return to the welcome screen after 60 seconds without a touch or key press,
+        // so the next patron never sees the previous patron's account.
+        (function () {
+            const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+            if (path.endsWith('/kiosk') || path.endsWith('/kiosk/index')) return;
+
+            const limit = 60;
+            let remaining = limit;
+            const label = document.getElementById('kiosk-timer');
+            const reset = () => remaining = limit;
+            ['click', 'touchstart', 'keydown', 'mousemove'].forEach(e => document.addEventListener(e, reset));
+
+            setInterval(() => {
+                remaining--;
+                label.textContent = remaining <= 15 ? `Logging out in ${remaining}s` : '';
+                if (remaining <= 0) window.location.href = '@Url.Action("Index", "Kiosk")';
+            }, 1000);
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
