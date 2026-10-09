@@ -205,6 +205,7 @@ namespace LibrarySystem.Controllers
         }
 
         // GET: Loans/Reserve
+        // Displays the reservation confirmation page with the borrower's queue position
         public async Task<IActionResult> Reserve(string libraryCode, string libraryCard)
         {
             var item = await _context.Items
@@ -215,19 +216,31 @@ namespace LibrarySystem.Controllers
 
             if (item == null || borrower == null) return NotFound();
 
+            // Check how many active reservations already exist for this item.
+            // Only count Waiting and Ready statuses — Collected, Cancelled, and Expired
+            // are no longer in the queue.
+            var existingCount = await _context.Reservations
+                .CountAsync(r => r.ItemId == item.Id &&
+                                 (r.Status == ReservationStatus.Waiting || r.Status == ReservationStatus.Ready));
+
+            // The new borrower's position is one after the last active reservation.
+            // Position 1 means they are next in line when the item becomes available.
             var viewModel = new LoanReserveViewModel
             {
                 ItemLibraryCode = item.LibraryCode,
                 ItemName = item.Name,
                 ItemStatus = item.Status.ToString(),
                 BorrowerName = borrower.Name,
-                BorrowerLibraryCard = borrower.LibraryCard
+                BorrowerLibraryCard = borrower.LibraryCard,
+                QueuePosition = existingCount + 1,
+                ExistingReservations = existingCount
             };
 
             return View(viewModel);
         }
 
         // POST: Loans/Reserve
+        // Creates a reservation in the waitlist queue. Notifies immediately if the item is available.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reserve(LoanReserveViewModel viewModel)
@@ -240,10 +253,50 @@ namespace LibrarySystem.Controllers
 
             if (item == null || borrower == null) return NotFound();
 
-            item.ReservedForBorrowerId = borrower.Id;
+            // Prevent duplicate reservations — a borrower cannot queue twice for the same item
+            var alreadyReserved = await _context.Reservations
+                .AnyAsync(r => r.ItemId == item.Id &&
+                               r.BorrowerId == borrower.Id &&
+                               (r.Status == ReservationStatus.Waiting || r.Status == ReservationStatus.Ready));
 
+            if (alreadyReserved)
+            {
+                TempData["ErrorMessage"] = $"{borrower.Name} already has an active reservation for {item.Name}.";
+                return RedirectToAction("Borrow");
+            }
+
+            // Determine queue position: one after the last active reservation
+            var nextPosition = await _context.Reservations
+                .CountAsync(r => r.ItemId == item.Id &&
+                                 (r.Status == ReservationStatus.Waiting || r.Status == ReservationStatus.Ready)) + 1;
+
+            var reservation = new Reservation
+            {
+                ItemId = item.Id,
+                BorrowerId = borrower.Id,
+                QueuePosition = nextPosition,
+                PlacedAt = DateTime.Now
+            };
+
+            // If the item is currently available and this is the first in the queue,
+            // mark it as ready for pickup immediately
+            if (item.Status == ItemStatus.Available && nextPosition == 1)
+            {
+                reservation.Status = ReservationStatus.Ready;
+                reservation.NotifiedAt = DateTime.Now;
+                reservation.ExpiresAt = DateTime.Now.AddHours(48);
+                item.Status = ItemStatus.Reserved;
+                item.ReservedForBorrowerId = borrower.Id;
+                _notifications.NotifyItemAvailable(borrower, item);
+            }
+
+            _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = $"{item.Name} ({item.LibraryCode}) has been reserved for {borrower.Name} ({borrower.LibraryCard}).";
+
+            TempData["SuccessMessage"] = nextPosition == 1 && item.Status == ItemStatus.Reserved
+                ? $"{item.Name} ({item.LibraryCode}) is ready for {borrower.Name} to collect. They have 48 hours."
+                : $"{borrower.Name} ({borrower.LibraryCard}) is #{nextPosition} in the queue for {item.Name} ({item.LibraryCode}).";
+
             return RedirectToAction("Borrow");
         }
 
@@ -281,6 +334,7 @@ namespace LibrarySystem.Controllers
         }
 
         // POST: Loans/Return/5
+        // Processes a return, calculates fines, and promotes the next borrower in the waitlist queue.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Return(int id, LoanReturnViewModel viewModel)
@@ -298,13 +352,39 @@ namespace LibrarySystem.Controllers
             loan.ReturnedDate = today;
             loan.Fine = fine > 0 ? fine : null;
 
-            if (loan.Item.ReservedForBorrowerId != null)
+            // If the borrower who just returned the item had a fulfilled reservation,
+            // mark it as Collected
+            var fulfilledReservation = await _context.Reservations
+                .FirstOrDefaultAsync(r => r.ItemId == loan.ItemId &&
+                                          r.BorrowerId == loan.BorrowerId &&
+                                          r.Status == ReservationStatus.Ready);
+            if (fulfilledReservation != null)
             {
+                fulfilledReservation.Status = ReservationStatus.Collected;
+            }
+
+            // Check if the next borrower in the waitlist queue is waiting
+            var nextReservation = await _context.Reservations
+                .Include(r => r.Borrower)
+                .Where(r => r.ItemId == loan.ItemId && r.Status == ReservationStatus.Waiting)
+                .OrderBy(r => r.QueuePosition)
+                .FirstOrDefaultAsync();
+
+            if (nextReservation != null)
+            {
+                // Notify the next borrower and give them 48 hours to collect
+                nextReservation.Status = ReservationStatus.Ready;
+                nextReservation.NotifiedAt = DateTime.Now;
+                nextReservation.ExpiresAt = DateTime.Now.AddHours(48);
                 loan.Item.Status = ItemStatus.Reserved;
+                loan.Item.ReservedForBorrowerId = nextReservation.BorrowerId;
+                _notifications.NotifyItemAvailable(nextReservation.Borrower, loan.Item);
             }
             else
             {
+                // No one waiting — item is available again
                 loan.Item.Status = ItemStatus.Available;
+                loan.Item.ReservedForBorrowerId = null;
             }
 
             if (fine > 0)

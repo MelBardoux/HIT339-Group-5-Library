@@ -17,6 +17,18 @@
 
     <dt class="col-sm-3">Reserve For</dt>
     <dd class="col-sm-9">@Model.BorrowerName (@Model.BorrowerLibraryCard)</dd>
+
+    <dt class="col-sm-3">Queue Position</dt>
+    <dd class="col-sm-9">
+        @if (Model.QueuePosition == 1 && Model.ItemStatus == "Available")
+        {
+            <span class="badge bg-success">Ready for immediate pickup</span>
+        }
+        else
+        {
+            <span class="badge bg-info">#@Model.QueuePosition in queue</span>
+        }
+    </dd>
 </dl>
 
 <form asp-action="Reserve" method="post">
