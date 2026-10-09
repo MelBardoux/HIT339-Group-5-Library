@@ -176,6 +176,9 @@
         }
         <div class="mt-4">
     <a href="@Url.Action("ExportBorrowingCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
+    <a href="@Url.Action("ExportBorrowingPdf", "Manager", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-danger">
+    <i class="bi bi-file-earmark-pdf"></i> Export PDF
+</a>
 </div>
     </div>
 
@@ -329,6 +332,7 @@
         }
         <div class="mt-4">
     <a href="@Url.Action("ExportItemsCsv", new { branchId = Model.BranchId })" class="btn btn-outline-success btn-sm">Export CSV</a>
+    <a href="@Url.Action("ExportItemsPdf", new { branchId = Model.BranchId })" class="btn btn-danger btn-sm">Export PDF</a>
 </div>
     </div>
 
@@ -432,6 +436,7 @@
         }
         <div class="mt-4">
     <a href="@Url.Action("ExportFinesCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
+    <a href="@Url.Action("ExportFinesPdf", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-danger btn-sm">Export PDF</a>
 </div>
     </div>
 </div>
