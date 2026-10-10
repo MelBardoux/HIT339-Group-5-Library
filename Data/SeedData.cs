@@ -1526,35 +1526,48 @@ namespace LibrarySystem.Data
                     var duneItem = allItems.First(i => i.LibraryCode == "BKS-0006");
                     var janeBorrower = allBorrowers.First(b => b.Name == "Jane Smith");
 
+                    // Get branch references for reservation placement
+                    var darwinBranch = await context.Branches.FirstAsync(b => b.Name == "Darwin");
+                    var sydneyBranch2 = await context.Branches.FirstAsync(b => b.Name == "Sydney");
+                    var brisbaneBranch2 = await context.Branches.FirstAsync(b => b.Name == "Brisbane");
+
                     context.Reservations.AddRange(
+                        // Noah in Sydney reserved at Sydney branch
                         new Reservation
                         {
                             ItemId = andThenItem.Id,
                             BorrowerId = noahBorrower.Id,
+                            BranchId = sydneyBranch2.Id,
                             PlacedAt = DateTime.Now.AddDays(-2),
                             QueuePosition = 1,
                             Status = ReservationStatus.Waiting
                         },
+                        // Charlotte in Brisbane reserved at Brisbane branch
                         new Reservation
                         {
                             ItemId = abcItem.Id,
                             BorrowerId = charlotteBorrower.Id,
+                            BranchId = brisbaneBranch2.Id,
                             PlacedAt = DateTime.Now.AddDays(-1),
                             QueuePosition = 1,
                             Status = ReservationStatus.Waiting
                         },
+                        // Olivia in Sydney reserved Thriller (held at Darwin) at Sydney branch - cross-branch scenario
                         new Reservation
                         {
                             ItemId = thrillerItem.Id,
                             BorrowerId = oliviaBorrower.Id,
+                            BranchId = sydneyBranch2.Id,
                             PlacedAt = DateTime.Now.AddDays(-3),
                             QueuePosition = 1,
                             Status = ReservationStatus.Waiting
                         },
+                        // Jane in Darwin reserved at Darwin branch
                         new Reservation
                         {
                             ItemId = duneItem.Id,
                             BorrowerId = janeBorrower.Id,
+                            BranchId = darwinBranch.Id,
                             PlacedAt = DateTime.Now.AddDays(-4),
                             QueuePosition = 1,
                             Status = ReservationStatus.Waiting

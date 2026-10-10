@@ -1,0 +1,78 @@
+﻿@model List<LibrarySystem.ViewModels.ReservationHistoryViewModel>
+
+@{
+    ViewData["Title"] = "Reservation History";
+}
+
+<h2>Reservations</h2>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="get" asp-action="History">
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="Waiting" selected="@(ViewBag.Status == "Waiting")">Waiting</option>
+                <option value="Ready" selected="@(ViewBag.Status == "Ready")">Ready</option>
+                <option value="Collected" selected="@(ViewBag.Status == "Collected")">Collected</option>
+                <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option>
+                <option value="Expired" selected="@(ViewBag.Status == "Expired")">Expired</option>
+            </select>
+        </form>
+    </div>
+    @if (!string.IsNullOrEmpty((string?)ViewBag.Status))
+    {
+        <div class="col-md-2">
+            <a asp-action="History" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <p>No past reservations found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Borrower</th>
+                <th>Placed</th>
+                <th>Notified</th>
+                <th>Expired</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var res in Model)
+            {
+                <tr>
+                    <td>@res.ItemLibraryCode</td>
+                    <td>@res.ItemName</td>
+                    <td>@res.BorrowerName (@res.BorrowerLibraryCard)</td>
+                    <td>@res.PlacedAt.ToString("dd/MM/yyyy")</td>
+                    <td>@(res.NotifiedAt?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    <td>@(res.ExpiresAt?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    <td>
+                        @if (res.Status == "Collected")
+                        {
+                            <span class="badge bg-success">Collected</span>
+                        }
+                        else if (res.Status == "Cancelled")
+                        {
+                            <span class="badge bg-secondary">Cancelled</span>
+                        }
+                        else if (res.Status == "Expired")
+                        {
+                            <span class="badge bg-warning text-dark">Expired</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>

@@ -2,8 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LibrarySystem.Models
-/// Represents a reservation in the waitlist queue for a library item.
-/// Supports multiple borrowers waiting for the same item, ordered by queue position.
 {
     public class Reservation
     {
@@ -16,6 +14,10 @@ namespace LibrarySystem.Models
         // The borrower requesting the reservation
         public int BorrowerId { get; set; }
         public Borrower Borrower { get; set; } = null!;
+
+        // The branch where the reservation was placed (for cross-branch transfers)
+        public int BranchId { get; set; }
+        public Branch Branch { get; set; } = null!;
 
         // When the reservation was placed
         public DateTime PlacedAt { get; set; } = DateTime.Now;
@@ -33,13 +35,12 @@ namespace LibrarySystem.Models
         public DateTime? ExpiresAt { get; set; }
     }
 
-    /// Tracks the lifecycle of a reservation in the waitlist queue.
     public enum ReservationStatus
     {
-        Waiting = 0,    // In queue, item not yet available
-        Ready = 1,      // Item available, borrower notified
-        Collected = 2,  // Borrower collected the item
-        Cancelled = 3,  // Borrower cancelled the reservation
-        Expired = 4     // Borrower did not collect within the pickup window
+        Waiting = 0,
+        Ready = 1,
+        Collected = 2,
+        Cancelled = 3,
+        Expired = 4
     }
 }
