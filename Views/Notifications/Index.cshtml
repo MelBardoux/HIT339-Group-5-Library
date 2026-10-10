@@ -66,42 +66,73 @@
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Sent</th>
-                    <th>Channel</th>
-                    <th>Type</th>
-                    <th>Borrower</th>
-                    <th>To</th>
-                    <th>Item</th>
-                    <th>Message</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var n in Model.Notifications)
-                {
-                    var badge = n.Type switch
-                    {
-                        NotificationType.ItemBorrowed => "bg-primary",
-                        NotificationType.DueSoon => "bg-warning text-dark",
-                        NotificationType.Overdue => "bg-danger",
-                        NotificationType.FineCharged => "bg-danger",
-                        NotificationType.ItemAvailable => "bg-success",
-                        _ => "bg-secondary"
-                    };
+    <!-- Desktop table -->
+    <div class="d-none d-md-block">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
                     <tr>
-                        <td class="text-nowrap">@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@(n.Channel == NotificationChannel.Email ? "✉ Email" : "📱 SMS")</td>
-                        <td><span class="badge @badge">@n.Type</span></td>
-                        <td>@n.Borrower.Name<br /><small class="text-muted">@n.Borrower.LibraryCard</small></td>
-                        <td><small>@n.Recipient</small></td>
-                        <td>@n.ItemLibraryCode</td>
-                        <td><strong>@n.Subject</strong><br /><small>@n.Message</small></td>
+                        <th>Sent</th>
+                        <th>Channel</th>
+                        <th>Type</th>
+                        <th>Borrower</th>
+                        <th>To</th>
+                        <th>Item</th>
+                        <th>Message</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var n in Model.Notifications)
+                    {
+                        var badge = n.Type switch
+                        {
+                            NotificationType.ItemBorrowed => "bg-primary",
+                            NotificationType.DueSoon => "bg-warning text-dark",
+                            NotificationType.Overdue => "bg-danger",
+                            NotificationType.FineCharged => "bg-danger",
+                            NotificationType.ItemAvailable => "bg-success",
+                            _ => "bg-secondary"
+                        };
+                        <tr>
+                            <td class="text-nowrap">@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@(n.Channel == NotificationChannel.Email ? "Email" : "SMS")</td>
+                            <td><span class="badge @badge">@n.Type</span></td>
+                            <td>@n.Borrower.Name<br /><small class="text-muted">@n.Borrower.LibraryCard</small></td>
+                            <td><small>@n.Recipient</small></td>
+                            <td>@n.ItemLibraryCode</td>
+                            <td style="max-width: 300px;"><strong>@n.Subject</strong><br /><small>@n.Message</small></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="d-md-none">
+        @foreach (var n in Model.Notifications)
+        {
+            var badge = n.Type switch
+            {
+                NotificationType.ItemBorrowed => "bg-primary",
+                NotificationType.DueSoon => "bg-warning text-dark",
+                NotificationType.Overdue => "bg-danger",
+                NotificationType.FineCharged => "bg-danger",
+                NotificationType.ItemAvailable => "bg-success",
+                _ => "bg-secondary"
+            };
+            <div class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="badge @badge">@n.Type</span>
+                        <small class="text-muted">@n.SentAt.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+                    <p class="mb-1"><strong>@n.Borrower.Name</strong> (@n.Borrower.LibraryCard)</p>
+                    <p class="mb-1"><small>@(n.Channel == NotificationChannel.Email ? "Email" : "SMS") to @n.Recipient</small></p>
+                    <p class="mb-1"><small class="text-muted">Item: @n.ItemLibraryCode</small></p>
+                    <p class="mb-0"><strong>@n.Subject</strong><br /><small>@n.Message</small></p>
+                </div>
+            </div>
+        }
     </div>
 }

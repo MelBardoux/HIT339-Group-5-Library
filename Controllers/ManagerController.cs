@@ -45,7 +45,8 @@ namespace LibrarySystem.Controllers
                 Branches = branches,
                 BorrowingStats = await GetBorrowingStats(today, branchId, startDate, endDate),
                 ItemStats = await GetItemStats(branchId),
-                FineStats = await GetFineStats(branchId, startDate, endDate)
+                FineStats = await GetFineStats(branchId, startDate, endDate),
+                ReservationStats = await GetReservationStats(branchId)
             };
 
             return View(viewModel);
@@ -323,6 +324,58 @@ namespace LibrarySystem.Controllers
             return stats;
         }
 
+        private async Task<ReservationStatsViewModel> GetReservationStats(int? branchId)
+        {
+            var query = _context.Reservations
+                .Include(r => r.Item)
+                .Include(r => r.Branch)
+                .AsQueryable();
+
+            if (branchId.HasValue)
+                query = query.Where(r => r.BranchId == branchId.Value);
+
+            var all = await query.ToListAsync();
+
+            // Calculate average wait time from collected reservations
+            var collected = all.Where(r => r.Status == Models.ReservationStatus.Collected && r.NotifiedAt.HasValue).ToList();
+            var avgWait = collected.Any()
+                ? collected.Average(r => (r.NotifiedAt!.Value - r.PlacedAt).TotalDays)
+                : 0;
+
+            return new ReservationStatsViewModel
+            {
+                TotalReservations = all.Count,
+                WaitingCount = all.Count(r => r.Status == Models.ReservationStatus.Waiting),
+                ReadyCount = all.Count(r => r.Status == Models.ReservationStatus.Ready),
+                CollectedCount = all.Count(r => r.Status == Models.ReservationStatus.Collected),
+                CancelledCount = all.Count(r => r.Status == Models.ReservationStatus.Cancelled),
+                ExpiredCount = all.Count(r => r.Status == Models.ReservationStatus.Expired),
+                AverageWaitDays = Math.Round(avgWait, 1),
+
+                ReservationsByBranch = all
+                    .GroupBy(r => r.Branch.Name)
+                    .Select(g => new ReservationByBranchViewModel
+                    {
+                        BranchName = g.Key,
+                        Count = g.Count()
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .ToList(),
+
+                MostReservedItems = all
+                    .GroupBy(r => r.ItemId)
+                    .Select(g => new MostReservedItemViewModel
+                    {
+                        LibraryCode = g.First().Item.LibraryCode,
+                        Name = g.First().Item.Name,
+                        ReservationCount = g.Count()
+                    })
+                    .OrderByDescending(x => x.ReservationCount)
+                    .Take(5)
+                    .ToList()
+            };
+        }
+
         // CSV export for the Borrowing statistics tab
         [HttpGet]
         public async Task<IActionResult> ExportBorrowingCsv(int? branchId, DateTime? startDate, DateTime? endDate)
@@ -459,6 +512,44 @@ namespace LibrarySystem.Controllers
 
             var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
             return File(bytes, "text/csv", $"FineReport_{DateTime.Now:yyyyMMdd}.csv");
+        }
+
+        // CSV export for the Reservations statistics tab
+        [HttpGet]
+        public async Task<IActionResult> ExportReservationsCsv(int? branchId)
+        {
+            var stats = await GetReservationStats(branchId);
+
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Report,Reservation Statistics");
+            csv.AppendLine($"Generated,{DateTime.Now:yyyy-MM-dd HH:mm}");
+            if (branchId.HasValue)
+                csv.AppendLine($"Branch,{(await _context.Branches.FindAsync(branchId.Value))?.Name ?? "Unknown"}");
+            csv.AppendLine();
+
+            csv.AppendLine("Metric,Value");
+            csv.AppendLine($"Total Reservations,{stats.TotalReservations}");
+            csv.AppendLine($"Waiting,{stats.WaitingCount}");
+            csv.AppendLine($"Ready,{stats.ReadyCount}");
+            csv.AppendLine($"Collected,{stats.CollectedCount}");
+            csv.AppendLine($"Cancelled,{stats.CancelledCount}");
+            csv.AppendLine($"Expired,{stats.ExpiredCount}");
+            csv.AppendLine($"Avg Wait (Days),{stats.AverageWaitDays}");
+            csv.AppendLine();
+
+            csv.AppendLine("Reservations by Branch");
+            csv.AppendLine("Branch,Count");
+            foreach (var b in stats.ReservationsByBranch)
+                csv.AppendLine($"{b.BranchName},{b.Count}");
+            csv.AppendLine();
+
+            csv.AppendLine("Most Reserved Items");
+            csv.AppendLine("Library Code,Name,Reservations");
+            foreach (var item in stats.MostReservedItems)
+                csv.AppendLine($"{item.LibraryCode},{item.Name},{item.ReservationCount}");
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", $"ReservationReport_{DateTime.Now:yyyyMMdd}.csv");
         }
 
         // PDF export for the Borrowing statistics tab
@@ -920,6 +1011,123 @@ namespace LibrarySystem.Controllers
             // Generate PDF bytes and return as file download
             var pdfBytes = document.GeneratePdf();
             return File(pdfBytes, "application/pdf", $"FineReport_{DateTime.Now:yyyyMMdd}.pdf");
+        }
+
+        // PDF export for the Reservations statistics tab
+        [HttpGet]
+        public async Task<IActionResult> ExportReservationsPdf(int? branchId)
+        {
+            var stats = await GetReservationStats(branchId);
+
+            var branchNameText = branchId.HasValue
+                ? (await _context.Branches.FindAsync(branchId.Value))?.Name ?? "Unknown"
+                : null;
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(30);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    page.Header().Column(col =>
+                    {
+                        col.Item().Text("Reservation Statistics Report")
+                            .FontSize(18).Bold().FontColor(Colors.Blue.Darken2);
+                        col.Item().Text($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}")
+                            .FontSize(9).FontColor(Colors.Grey.Darken1);
+                        if (branchNameText != null)
+                            col.Item().Text($"Branch: {branchNameText}")
+                                .FontSize(9).FontColor(Colors.Grey.Darken1);
+                        col.Item().PaddingBottom(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+                    });
+
+                    page.Content().Column(col =>
+                    {
+                        col.Item().Text("Key Metrics").FontSize(13).Bold();
+                        col.Item().PaddingBottom(5).Table(table =>
+                        {
+                            table.ColumnsDefinition(c =>
+                            {
+                                c.RelativeColumn();
+                                c.RelativeColumn();
+                            });
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(5)
+                                .Text($"Total Reservations: {stats.TotalReservations}");
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(5)
+                                .Text($"Waiting: {stats.WaitingCount}");
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(5)
+                                .Text($"Ready: {stats.ReadyCount}");
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(5)
+                                .Text($"Collected: {stats.CollectedCount}");
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(5)
+                                .Text($"Cancelled: {stats.CancelledCount}");
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(5)
+                                .Text($"Expired: {stats.ExpiredCount}");
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(5)
+                                .Text($"Avg Wait: {stats.AverageWaitDays} days");
+                        });
+
+                        col.Item().PaddingTop(10);
+
+                        col.Item().Text("Reservations by Branch").FontSize(13).Bold();
+                        col.Item().PaddingBottom(5).Table(table =>
+                        {
+                            table.ColumnsDefinition(c =>
+                            {
+                                c.RelativeColumn(2);
+                                c.RelativeColumn(1);
+                            });
+                            table.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(4)
+                                .Text("Branch").Bold();
+                            table.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(4)
+                                .Text("Count").Bold();
+                            foreach (var b in stats.ReservationsByBranch)
+                            {
+                                table.Cell().Border(1).Padding(4).Text(b.BranchName);
+                                table.Cell().Border(1).Padding(4).Text(b.Count.ToString());
+                            }
+                        });
+
+                        col.Item().PaddingTop(10);
+
+                        col.Item().Text("Most Reserved Items").FontSize(13).Bold();
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(c =>
+                            {
+                                c.RelativeColumn(2);
+                                c.RelativeColumn(3);
+                                c.RelativeColumn(1);
+                            });
+                            table.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(4)
+                                .Text("Library Code").Bold();
+                            table.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(4)
+                                .Text("Name").Bold();
+                            table.Cell().Border(1).Background(Colors.Grey.Lighten3).Padding(4)
+                                .Text("Reservations").Bold();
+                            foreach (var item in stats.MostReservedItems)
+                            {
+                                table.Cell().Border(1).Padding(4).Text(item.LibraryCode);
+                                table.Cell().Border(1).Padding(4).Text(item.Name);
+                                table.Cell().Border(1).Padding(4).Text(item.ReservationCount.ToString());
+                            }
+                        });
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+                });
+            });
+
+            var pdfBytes = document.GeneratePdf();
+            return File(pdfBytes, "application/pdf", $"ReservationReport_{DateTime.Now:yyyyMMdd}.pdf");
         }
     }
 }

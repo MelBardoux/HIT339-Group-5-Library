@@ -6,7 +6,6 @@
 
 <h2>Manager Dashboard</h2>
 
-<!-- Branch and date range filter bar -->
 <form method="get" class="row g-2 mb-4 align-items-end">
     <div class="col-md-3">
         <label class="form-label">Branch</label>
@@ -51,53 +50,53 @@
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="fines-tab" data-bs-toggle="tab" data-bs-target="#fines" type="button" role="tab">Fines</button>
     </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations" type="button" role="tab">Reservations</button>
+    </li>
 </ul>
 
 <div class="tab-content" id="statsTabContent">
 
     <!-- Borrowing Tab -->
     <div class="tab-pane fade show active" id="borrowing" role="tabpanel">
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Loans</h5>
-                        <p class="display-6">@Model.BorrowingStats.TotalLoans</p>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Total Loans</div>
+                        <div class="fw-bold fs-4">@Model.BorrowingStats.TotalLoans</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Active Loans</h5>
-                        <p class="display-6">@Model.BorrowingStats.ActiveLoans</p>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Active</div>
+                        <div class="fw-bold fs-4">@Model.BorrowingStats.ActiveLoans</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-center border-danger">
-                    <div class="card-body">
-                        <h5 class="card-title text-danger">Overdue</h5>
-                        <p class="display-6 text-danger">@Model.BorrowingStats.OverdueLoans</p>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2 border-danger">
+                    <div class="card-body p-2">
+                        <div class="text-danger" style="font-size: 0.8rem;">Overdue</div>
+                        <div class="fw-bold fs-4 text-danger">@Model.BorrowingStats.OverdueLoans</div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Avg Loan Duration</h5>
-                        <p class="display-6">@Model.BorrowingStats.AverageLoanDurationDays days</p>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Avg Duration</div>
+                        <div class="fw-bold fs-4">@Model.BorrowingStats.AverageLoanDurationDays<small class="text-muted fs-6">d</small></div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">On-Time Return Rate</h5>
-                        <p class="display-6">@Model.BorrowingStats.ReturnRate%</p>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">On-Time Return</div>
+                        <div class="fw-bold fs-4">@Model.BorrowingStats.ReturnRate<small class="text-muted fs-6">%</small></div>
                     </div>
                 </div>
             </div>
@@ -105,14 +104,14 @@
 
         @if (Model.BorrowingStats.MostBorrowedItems.Any())
         {
-            <h5>Most Borrowed Items</h5>
-            <table class="table table-sm mb-4">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Most Borrowed Items</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Library Code</th>
                         <th>Name</th>
                         <th>Type</th>
-                        <th>Times Borrowed</th>
+                        <th>Borrows</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -131,9 +130,9 @@
 
         @if (Model.BorrowingStats.BusiestBorrowers.Any())
         {
-            <h5>Busiest Borrowers</h5>
-            <table class="table table-sm mb-4">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Busiest Borrowers</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Library Card</th>
                         <th>Name</th>
@@ -155,9 +154,9 @@
 
         @if (Model.BorrowingStats.LoansPerMonth.Any())
         {
-            <h5>Loans Per Month</h5>
-            <table class="table table-sm">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Loans Per Month</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Month</th>
                         <th>Loans</th>
@@ -174,92 +173,78 @@
                 </tbody>
             </table>
         }
-        <div class="mt-4">
-    <a href="@Url.Action("ExportBorrowingCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
-    <a href="@Url.Action("ExportBorrowingPdf", "Manager", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-danger">
-    <i class="bi bi-file-earmark-pdf"></i> Export PDF
-</a>
-</div>
+
+        <div class="mt-3">
+            <a href="@Url.Action("ExportBorrowingCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
+            <a href="@Url.Action("ExportBorrowingPdf", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-danger btn-sm">Export PDF</a>
+        </div>
     </div>
 
     <!-- Items Tab -->
     <div class="tab-pane fade" id="items" role="tabpanel">
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Items</h5>
-                        <p class="display-6">@Model.ItemStats.TotalItems</p>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Total Items</div>
+                        <div class="fw-bold fs-4">@Model.ItemStats.TotalItems</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Books</h5>
-                        <p class="display-6">@Model.ItemStats.BookCount</p>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Books</div>
+                        <div class="fw-bold fs-4">@Model.ItemStats.BookCount</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Toys</h5>
-                        <p class="display-6">@Model.ItemStats.ToyCount</p>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Toys</div>
+                        <div class="fw-bold fs-4">@Model.ItemStats.ToyCount</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Music</h5>
-                        <p class="display-6">@Model.ItemStats.MusicCount</p>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Music</div>
+                        <div class="fw-bold fs-4">@Model.ItemStats.MusicCount</div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-center border-success">
-                    <div class="card-body">
-                        <h5 class="card-title text-success">On Order</h5>
-                        <p class="display-6 text-success">@Model.ItemStats.OnOrderCount</p>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card text-center py-2 border-success">
+                    <div class="card-body p-2">
+                        <div class="text-success" style="font-size: 0.8rem;">On Order</div>
+                        <div class="fw-bold fs-4 text-success">@Model.ItemStats.OnOrderCount</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center border-info">
-                    <div class="card-body">
-                        <h5 class="card-title text-info">Reserved</h5>
-                        <p class="display-6 text-info">@Model.ItemStats.ReservedCount</p>
+            <div class="col-6 col-md-3">
+                <div class="card text-center py-2 border-info">
+                    <div class="card-body p-2">
+                        <div class="text-info" style="font-size: 0.8rem;">Reserved</div>
+                        <div class="fw-bold fs-4 text-info">@Model.ItemStats.ReservedCount</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center border-warning">
-                    <div class="card-body">
-                        <h5 class="card-title text-warning">Damaged</h5>
-                        <p class="display-6 text-warning">@Model.ItemStats.DamagedCount</p>
+            <div class="col-6 col-md-3">
+                <div class="card text-center py-2 border-warning">
+                    <div class="card-body p-2">
+                        <div class="text-warning" style="font-size: 0.8rem;">Damaged</div>
+                        <div class="fw-bold fs-4 text-warning">@Model.ItemStats.DamagedCount</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center border-danger">
-                    <div class="card-body">
-                        <h5 class="card-title text-danger">Lost / Destroyed</h5>
-                        <p class="display-6 text-danger">@(Model.ItemStats.LostCount + Model.ItemStats.DestroyedCount)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Avg Turnover Rate</h5>
-                        <p class="display-6">@Model.ItemStats.AverageTurnoverRate loans/item</p>
+            <div class="col-6 col-md-3">
+                <div class="card text-center py-2 border-danger">
+                    <div class="card-body p-2">
+                        <div class="text-danger" style="font-size: 0.8rem;">Lost / Destroyed</div>
+                        <div class="fw-bold fs-4 text-danger">@(Model.ItemStats.LostCount + Model.ItemStats.DestroyedCount)</div>
                     </div>
                 </div>
             </div>
@@ -267,9 +252,9 @@
 
         @if (Model.ItemStats.StatusCounts.Any())
         {
-            <h5>Items by Status</h5>
-            <table class="table table-sm mb-4">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Items by Status</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Status</th>
                         <th>Count</th>
@@ -289,9 +274,9 @@
 
         @if (Model.ItemStats.PopularGenres.Any())
         {
-            <h5>Popular Book Genres</h5>
-            <table class="table table-sm mb-4">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Popular Book Genres</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Genre</th>
                         <th>Books</th>
@@ -311,9 +296,9 @@
 
         @if (Model.ItemStats.ItemsAddedPerMonth.Any())
         {
-            <h5>Items Added Per Month</h5>
-            <table class="table table-sm">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Items Added Per Month</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Month</th>
                         <th>Items</th>
@@ -330,36 +315,37 @@
                 </tbody>
             </table>
         }
-        <div class="mt-4">
-    <a href="@Url.Action("ExportItemsCsv", new { branchId = Model.BranchId })" class="btn btn-outline-success btn-sm">Export CSV</a>
-    <a href="@Url.Action("ExportItemsPdf", new { branchId = Model.BranchId })" class="btn btn-danger btn-sm">Export PDF</a>
-</div>
+
+        <div class="mt-3">
+            <a href="@Url.Action("ExportItemsCsv", new { branchId = Model.BranchId })" class="btn btn-outline-success btn-sm">Export CSV</a>
+            <a href="@Url.Action("ExportItemsPdf", new { branchId = Model.BranchId })" class="btn btn-outline-danger btn-sm">Export PDF</a>
+        </div>
     </div>
 
     <!-- Fines Tab -->
     <div class="tab-pane fade" id="fines" role="tabpanel">
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Outstanding Fines</h5>
-                        <p class="display-6 text-danger">@Model.FineStats.OutstandingFines.ToString("C")</p>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-4">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Outstanding</div>
+                        <div class="fw-bold fs-4 text-danger">@Model.FineStats.OutstandingFines.ToString("C")</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Collected</h5>
-                        <p class="display-6">@Model.FineStats.TotalFinesCollected.ToString("C")</p>
+            <div class="col-6 col-md-4">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Collected</div>
+                        <div class="fw-bold fs-4">@Model.FineStats.TotalFinesCollected.ToString("C")</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Average Fine</h5>
-                        <p class="display-6">@Model.FineStats.AverageFineAmount.ToString("C")</p>
+            <div class="col-6 col-md-4">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Avg Fine</div>
+                        <div class="fw-bold fs-4">@Model.FineStats.AverageFineAmount.ToString("C")</div>
                     </div>
                 </div>
             </div>
@@ -367,12 +353,12 @@
 
         @if (Model.FineStats.FinesPerBranch.Any())
         {
-            <h5>Fines by Branch</h5>
-            <table class="table table-sm mb-4">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Fines by Branch</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Branch</th>
-                        <th>Fine Count</th>
+                        <th>Count</th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -391,9 +377,9 @@
 
         @if (Model.FineStats.FinesPerMonth.Any())
         {
-            <h5>Fines by Month</h5>
-            <table class="table table-sm mb-4">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Fines by Month</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Month</th>
                         <th>Total</th>
@@ -413,9 +399,9 @@
 
         @if (Model.FineStats.BorrowersWithOutstandingFines.Any())
         {
-            <h5>Borrowers with Outstanding Fines</h5>
-            <table class="table table-sm">
-                <thead>
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Borrowers with Outstanding Fines</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
                     <tr>
                         <th>Library Card</th>
                         <th>Name</th>
@@ -434,9 +420,107 @@
                 </tbody>
             </table>
         }
-        <div class="mt-4">
-    <a href="@Url.Action("ExportFinesCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
-    <a href="@Url.Action("ExportFinesPdf", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-danger btn-sm">Export PDF</a>
-</div>
+
+        <div class="mt-3">
+            <a href="@Url.Action("ExportFinesCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
+            <a href="@Url.Action("ExportFinesPdf", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-danger btn-sm">Export PDF</a>
+        </div>
+    </div>
+
+    <!-- Reservations Tab -->
+    <div class="tab-pane fade" id="reservations" role="tabpanel">
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Total</div>
+                        <div class="fw-bold fs-4">@Model.ReservationStats.TotalReservations</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2 border-info">
+                    <div class="card-body p-2">
+                        <div class="text-info" style="font-size: 0.8rem;">Waiting</div>
+                        <div class="fw-bold fs-4 text-info">@Model.ReservationStats.WaitingCount</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2 border-warning">
+                    <div class="card-body p-2">
+                        <div class="text-warning" style="font-size: 0.8rem;">Ready</div>
+                        <div class="fw-bold fs-4 text-warning">@Model.ReservationStats.ReadyCount</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2 border-success">
+                    <div class="card-body p-2">
+                        <div class="text-success" style="font-size: 0.8rem;">Collected</div>
+                        <div class="fw-bold fs-4 text-success">@Model.ReservationStats.CollectedCount</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center py-2">
+                    <div class="card-body p-2">
+                        <div class="text-muted" style="font-size: 0.8rem;">Avg Wait</div>
+                        <div class="fw-bold fs-4">@Model.ReservationStats.AverageWaitDays<small class="text-muted fs-6">d</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.ReservationStats.ReservationsByBranch.Any())
+        {
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Reservations by Branch</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>Branch</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.ReservationStats.ReservationsByBranch)
+                    {
+                        <tr>
+                            <td>@b.BranchName</td>
+                            <td>@b.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (Model.ReservationStats.MostReservedItems.Any())
+        {
+            <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">Most Reserved Items</h6>
+            <table class="table table-sm table-bordered table-striped mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>Library Code</th>
+                        <th>Name</th>
+                        <th>Reservations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ReservationStats.MostReservedItems)
+                    {
+                        <tr>
+                            <td>@item.LibraryCode</td>
+                            <td>@item.Name</td>
+                            <td>@item.ReservationCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <div class="mt-3">
+            <a href="@Url.Action("ExportReservationsCsv", new { branchId = Model.BranchId })" class="btn btn-outline-success btn-sm">Export CSV</a>
+            <a href="@Url.Action("ExportReservationsPdf", new { branchId = Model.BranchId })" class="btn btn-outline-danger btn-sm">Export PDF</a>
+        </div>
     </div>
 </div>

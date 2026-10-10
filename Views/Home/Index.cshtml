@@ -216,8 +216,8 @@
             <a asp-controller="Loans" asp-action="Index" class="dashboard-tile tile-accent-teal">
                 <div class="card">
                     <div class="card-body">
-                        <div class="tile-title">Loan History</div>
-                        <p class="tile-desc">View all loan records</p>
+                        <div class="tile-title">Loan Records</div>
+                        <p class="tile-desc">Returns, fines and loan history</p>
                     </div>
                 </div>
             </a>
@@ -233,8 +233,11 @@
             </a>
         </div>
         <div class="col-6 col-md-4">
-            <a asp-controller="ItemTransfers" asp-action="Index" class="dashboard-tile tile-accent-red">
-                <div class="card">
+            @{
+    var transferStyle = ViewBag.HasPendingTransfers == true ? "background-color: #fff0f0;" : "";
+}
+<a asp-controller="ItemTransfers" asp-action="Index" class="dashboard-tile tile-accent-red">
+                <div class="card" style="@transferStyle">
                     <div class="card-body">
                         <div class="tile-title">Item Transfers</div>
                         <p class="tile-desc">Request and manage transfers</p>

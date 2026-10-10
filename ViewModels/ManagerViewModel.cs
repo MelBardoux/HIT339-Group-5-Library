@@ -2,18 +2,17 @@
 {
     public class ManagerViewModel
     {
-        // Filter properties bound from the query string
         public int? BranchId { get; set; }
         public string? BranchName { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
-        // Dropdown options for the branch filter
         public List<BranchFilterViewModel> Branches { get; set; } = new();
 
         public BorrowingStatsViewModel BorrowingStats { get; set; }
         public ItemStatsViewModel ItemStats { get; set; }
         public FineStatsViewModel FineStats { get; set; }
+        public ReservationStatsViewModel ReservationStats { get; set; }
     }
 
     public class BorrowingStatsViewModel
@@ -21,9 +20,7 @@
         public int TotalLoans { get; set; }
         public int ActiveLoans { get; set; }
         public int OverdueLoans { get; set; }
-        // Average number of days items are kept before return
         public double AverageLoanDurationDays { get; set; }
-        // Percentage of loans returned on time
         public double ReturnRate { get; set; }
         public List<MostBorrowedItemViewModel> MostBorrowedItems { get; set; } = new();
         public List<BusiestBorrowerViewModel> BusiestBorrowers { get; set; } = new();
@@ -38,11 +35,9 @@
         public int MusicCount { get; set; }
         public int OnOrderCount { get; set; }
         public int ReservedCount { get; set; }
-        // Number of items marked Damaged, Lost, or Destroyed
         public int DamagedCount { get; set; }
         public int LostCount { get; set; }
         public int DestroyedCount { get; set; }
-        // Average times each item has been borrowed
         public double AverageTurnoverRate { get; set; }
         public List<StatusCountViewModel> StatusCounts { get; set; } = new();
         public List<MonthlyCountViewModel> ItemsAddedPerMonth { get; set; } = new();
@@ -54,11 +49,35 @@
         public decimal TotalFinesCollected { get; set; }
         public decimal OutstandingFines { get; set; }
         public decimal AverageFineAmount { get; set; }
-        // Fine totals grouped by month for trend display
         public List<MonthlyDecimalViewModel> FinesPerMonth { get; set; } = new();
-        // Fine totals grouped by branch
         public List<BranchFineViewModel> FinesPerBranch { get; set; } = new();
         public List<BorrowerFineViewModel> BorrowersWithOutstandingFines { get; set; } = new();
+    }
+
+    public class ReservationStatsViewModel
+    {
+        public int TotalReservations { get; set; }
+        public int WaitingCount { get; set; }
+        public int ReadyCount { get; set; }
+        public int CollectedCount { get; set; }
+        public int CancelledCount { get; set; }
+        public int ExpiredCount { get; set; }
+        public double AverageWaitDays { get; set; }
+        public List<ReservationByBranchViewModel> ReservationsByBranch { get; set; } = new();
+        public List<MostReservedItemViewModel> MostReservedItems { get; set; } = new();
+    }
+
+    public class ReservationByBranchViewModel
+    {
+        public string BranchName { get; set; } = string.Empty;
+        public int Count { get; set; }
+    }
+
+    public class MostReservedItemViewModel
+    {
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public int ReservationCount { get; set; }
     }
 
     public class MostBorrowedItemViewModel
@@ -101,21 +120,18 @@
         public decimal TotalFines { get; set; }
     }
 
-    // Used to populate the branch filter dropdown on the dashboard
     public class BranchFilterViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    // Monthly fine totals for the fine revenue trend table
     public class MonthlyDecimalViewModel
     {
         public string Month { get; set; } = string.Empty;
         public decimal Amount { get; set; }
     }
 
-    // Fine totals broken down by branch
     public class BranchFineViewModel
     {
         public string BranchName { get; set; } = string.Empty;
