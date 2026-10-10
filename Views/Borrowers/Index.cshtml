@@ -59,10 +59,10 @@
                 <td>@borrower.Phone</td>
                 <td>@borrower.Status</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@borrower.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@borrower.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@borrower.Id">Delete</a>
-                </td>
+    <a asp-action="Edit" asp-route-id="@borrower.Id" class="btn btn-sm btn-outline-secondary me-1 mb-1 text-center" style="width: 70px;">Edit</a>
+    <a asp-action="Details" asp-route-id="@borrower.Id" class="btn btn-sm btn-outline-secondary me-1 mb-1 text-center" style="width: 70px;">Details</a>
+    <a asp-action="Delete" asp-route-id="@borrower.Id" class="btn btn-sm btn-outline-danger mb-1 text-center" style="width: 70px;">Delete</a>
+</td>
             </tr>
         }
     </tbody>

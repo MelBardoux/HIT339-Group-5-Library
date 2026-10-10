@@ -1,4 +1,4 @@
-﻿@model LibrarySystem.ViewModels.BranchInventoryViewModel // Page now expects the viewmodel BranchInventoryViewModel
+﻿@model LibrarySystem.ViewModels.BranchInventoryViewModel
 
 @{
     ViewData["Title"] = "Branch Inventory";
@@ -7,30 +7,41 @@
 <h1>Branch Inventory</h1>
 
 <form asp-controller="Branches" asp-action="Inventory" method="get" class="mb-4">
-    <div class="form-group">
-        <label for="branchId">View inventory for:</label>
-
-        <select id="branchId"
-                name="branchId"
-                class="form-select"
-                onchange="this.form.submit()">
-
-            <option value="">All Branches</option>
-
-            @foreach (var branch in Model.Branches)
-            {
-                <option value="@branch.Id"
-                        selected="@(Model.SelectedBranchId == branch.Id)">
-                    @branch.Name
-                </option>
-            }
-        </select>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label for="branchId">View inventory for:</label>
+            <select id="branchId"
+                    name="branchId"
+                    class="form-select"
+                    onchange="this.form.submit()">
+                <option value="">All Branches</option>
+                @foreach (var branch in Model.Branches)
+                {
+                    <option value="@branch.Id"
+                            selected="@(Model.SelectedBranchId == branch.Id)">
+                        @branch.Name
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="type">Filter by type:</label>
+            <select id="type"
+                    name="type"
+                    class="form-select"
+                    onchange="this.form.submit()">
+                <option value="">All Types</option>
+                <option value="Book" selected="@(Model.SelectedType == "Book")">Book</option>
+                <option value="Toy" selected="@(Model.SelectedType == "Toy")">Toy</option>
+                <option value="Music" selected="@(Model.SelectedType == "Music")">Music</option>
+            </select>
+        </div>
     </div>
 </form>
 
 @if (!Model.Items.Any())
 {
-    <p>No inventory items were found for the selected branch.</p>
+    <p>No inventory items were found for the selected filters.</p>
 }
 else
 {
@@ -45,7 +56,6 @@ else
                 <th>On Order</th>
             </tr>
         </thead>
-
         <tbody>
             @foreach (var item in Model.Items)
             {
