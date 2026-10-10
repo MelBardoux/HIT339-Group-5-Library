@@ -110,9 +110,13 @@ namespace LibrarySystem.Controllers
                 return RedirectToAction(nameof(Checkout), new { card });
             }
 
-            bool reservedForMe = item.Status == ItemStatus.Reserved && item.ReservedForBorrowerId == borrower.Id;
+            // Check if this borrower has a ready reservation for this item
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(r => r.ItemId == item.Id
+                                       && r.BorrowerId == borrower.Id
+                                       && r.Status == ReservationStatus.Ready);
 
-            if (item.Status != ItemStatus.Available && !reservedForMe)
+            if (item.Status != ItemStatus.Available && reservation == null)
             {
                 TempData["KioskError"] = $"{item.Name} can't be borrowed right now (status: {item.Status}). " +
                                          "Please see the front desk.";
@@ -130,7 +134,11 @@ namespace LibrarySystem.Controllers
                 DueDate = today.AddDays(LoanDays)
             };
 
-            if (reservedForMe) item.ReservedForBorrowerId = null;
+            // Mark the reservation as collected if one exists
+            if (reservation != null)
+            {
+                reservation.Status = ReservationStatus.Collected;
+            }
             item.Status = ItemStatus.Borrowed;
             _context.Loans.Add(loan);
             await _context.SaveChangesAsync();   // save first so the loan has an Id
@@ -156,10 +164,14 @@ namespace LibrarySystem.Controllers
                 CurrentLoans = await LoanRows(borrowerLoans.Where(l => l.ReturnedDate == null))
                     .OrderBy(l => l.DueDate).ToListAsync(),
                 UnpaidFines = await LoanRows(borrowerLoans.Where(l => l.Fine > 0)).ToListAsync(),
-                ReservedItems = await _context.Items
-                    .Where(i => i.ReservedForBorrower != null && i.ReservedForBorrower.LibraryCard == borrower.LibraryCard)
-                    .Select(i => i.Name + " (" + i.LibraryCode + ") - " +
-                                 (i.Status == ItemStatus.Reserved ? "ready to collect" : "waiting"))
+                // Query active reservations from the new Reservations table
+                ReservedItems = await _context.Reservations
+                    .Include(r => r.Item)
+                    .Where(r => r.Borrower.LibraryCard == borrower.LibraryCard
+                             && (r.Status == ReservationStatus.Waiting || r.Status == ReservationStatus.Ready))
+                    .OrderBy(r => r.QueuePosition)
+                    .Select(r => r.Item.Name + " (" + r.Item.LibraryCode + ") - " +
+                                 (r.Status == ReservationStatus.Ready ? "ready to collect" : "waiting, #" + r.QueuePosition + " in queue"))
                     .ToListAsync()
             };
 

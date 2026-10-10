@@ -27,8 +27,12 @@ namespace LibrarySystem.Services
                 {
                     using var scope = _scopeFactory.CreateScope();
                     var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
                     int sent = await service.RunDueDateCheckAsync();
                     _logger.LogInformation("Automatic due-date check finished: {Count} reminder(s) sent.", sent);
+
+                    int expired = await service.RunReservationExpiryCheckAsync();
+                    _logger.LogInformation("Reservation expiry check finished: {Count} reservation(s) expired.", expired);
                 }
                 catch (Exception ex)
                 {

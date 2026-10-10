@@ -21,5 +21,9 @@ namespace LibrarySystem.Services
         /// Scans all active loans and sends "due soon" and "overdue / fine accruing" reminders.
         /// Each loan gets at most one reminder of each type per day. Returns how many were sent.
         Task<int> RunDueDateCheckAsync();
+
+        /// Checks for expired reservations (past the 48-hour pickup window).
+        /// Expires them, moves up the next borrower in the queue, and notifies them.
+        Task<int> RunReservationExpiryCheckAsync();
     }
 }

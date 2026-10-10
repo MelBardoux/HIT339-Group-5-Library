@@ -6,6 +6,41 @@
 
 <h2>Manager Dashboard</h2>
 
+<!-- Branch and date range filter bar -->
+<form method="get" class="row g-2 mb-4 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label">Branch</label>
+        <select name="branchId" class="form-select">
+            <option value="">All Branches</option>
+            @foreach (var branch in Model.Branches)
+            {
+                <option value="@branch.Id" selected="@(Model.BranchId == branch.Id)">@branch.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Start Date</label>
+        <input type="date" name="startDate" class="form-control"
+               value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">End Date</label>
+        <input type="date" name="endDate" class="form-control"
+               value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary me-2">Filter</button>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
+@if (Model.BranchName != null)
+{
+    <div class="alert alert-info py-2">
+        Showing data for <strong>@Model.BranchName</strong>
+    </div>
+}
+
 <ul class="nav nav-tabs mb-4" id="statsTabs" role="tablist">
     <li class="nav-item" role="presentation">
         <button class="nav-link active" id="borrowing-tab" data-bs-toggle="tab" data-bs-target="#borrowing" type="button" role="tab">Borrowing</button>
@@ -44,6 +79,25 @@
                     <div class="card-body">
                         <h5 class="card-title text-danger">Overdue</h5>
                         <p class="display-6 text-danger">@Model.BorrowingStats.OverdueLoans</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Avg Loan Duration</h5>
+                        <p class="display-6">@Model.BorrowingStats.AverageLoanDurationDays days</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">On-Time Return Rate</h5>
+                        <p class="display-6">@Model.BorrowingStats.ReturnRate%</p>
                     </div>
                 </div>
             </div>
@@ -120,6 +174,12 @@
                 </tbody>
             </table>
         }
+        <div class="mt-4">
+    <a href="@Url.Action("ExportBorrowingCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
+    <a href="@Url.Action("ExportBorrowingPdf", "Manager", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-danger">
+    <i class="bi bi-file-earmark-pdf"></i> Export PDF
+</a>
+</div>
     </div>
 
     <!-- Items Tab -->
@@ -160,7 +220,7 @@
         </div>
 
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="card text-center border-success">
                     <div class="card-body">
                         <h5 class="card-title text-success">On Order</h5>
@@ -168,11 +228,38 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="card text-center border-info">
                     <div class="card-body">
                         <h5 class="card-title text-info">Reserved</h5>
                         <p class="display-6 text-info">@Model.ItemStats.ReservedCount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">Damaged</h5>
+                        <p class="display-6 text-warning">@Model.ItemStats.DamagedCount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-danger">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger">Lost / Destroyed</h5>
+                        <p class="display-6 text-danger">@(Model.ItemStats.LostCount + Model.ItemStats.DestroyedCount)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Avg Turnover Rate</h5>
+                        <p class="display-6">@Model.ItemStats.AverageTurnoverRate loans/item</p>
                     </div>
                 </div>
             </div>
@@ -243,6 +330,10 @@
                 </tbody>
             </table>
         }
+        <div class="mt-4">
+    <a href="@Url.Action("ExportItemsCsv", new { branchId = Model.BranchId })" class="btn btn-outline-success btn-sm">Export CSV</a>
+    <a href="@Url.Action("ExportItemsPdf", new { branchId = Model.BranchId })" class="btn btn-danger btn-sm">Export PDF</a>
+</div>
     </div>
 
     <!-- Fines Tab -->
@@ -274,6 +365,52 @@
             </div>
         </div>
 
+        @if (Model.FineStats.FinesPerBranch.Any())
+        {
+            <h5>Fines by Branch</h5>
+            <table class="table table-sm mb-4">
+                <thead>
+                    <tr>
+                        <th>Branch</th>
+                        <th>Fine Count</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.FineStats.FinesPerBranch)
+                    {
+                        <tr>
+                            <td>@b.BranchName</td>
+                            <td>@b.FineCount</td>
+                            <td class="text-danger">@b.TotalFines.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (Model.FineStats.FinesPerMonth.Any())
+        {
+            <h5>Fines by Month</h5>
+            <table class="table table-sm mb-4">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.FineStats.FinesPerMonth)
+                    {
+                        <tr>
+                            <td>@m.Month</td>
+                            <td class="text-danger">@m.Amount.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
         @if (Model.FineStats.BorrowersWithOutstandingFines.Any())
         {
             <h5>Borrowers with Outstanding Fines</h5>
@@ -297,5 +434,9 @@
                 </tbody>
             </table>
         }
+        <div class="mt-4">
+    <a href="@Url.Action("ExportFinesCsv", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-outline-success btn-sm">Export CSV</a>
+    <a href="@Url.Action("ExportFinesPdf", new { branchId = Model.BranchId, startDate = Model.StartDate, endDate = Model.EndDate })" class="btn btn-danger btn-sm">Export PDF</a>
+</div>
     </div>
 </div>
