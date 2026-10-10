@@ -7,47 +7,297 @@
 }
 
 <style>
-    .home-card {
-        transition: transform 0.2s, box-shadow 0.2s;
+    .dashboard-tile {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+    .dashboard-tile:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+    .dashboard-tile .card {
+        background: #fff;
+        border: 1px solid #e0e2e6;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border-left: 5px solid transparent;
+        transition: transform 0.15s, box-shadow 0.15s;
+        height: 100%;
+        min-height: 160px;
+        display: flex;
+        align-items: center;
+    }
+    .dashboard-tile:hover .card {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+    .dashboard-tile .card-body {
+        padding: 1.75rem 1.5rem;
+        width: 100%;
+    }
+    .dashboard-tile .tile-title {
+        font-weight: 600;
+        font-size: 1.15rem;
+        margin-bottom: 0.4rem;
+    }
+    .dashboard-tile .tile-desc {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0;
     }
 
-        .home-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+    .tile-accent-blue .card { border-left-color: #4a90d9; }
+    .tile-accent-green .card { border-left-color: #28a745; }
+    .tile-accent-orange .card { border-left-color: #fd7e14; }
+    .tile-accent-purple .card { border-left-color: #6f42c1; }
+    .tile-accent-teal .card { border-left-color: #20c997; }
+    .tile-accent-red .card { border-left-color: #dc3545; }
+
+    .section-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #d6d8db;
+    }
+
 </style>
 
-<div class="text-center mb-5">
-    <h1 class="display-4" style="font-weight: 500;">Welcome to the Library</h1>
-    <p class="lead text-muted">A library management system for books, toys, and music</p>
-</div>
+@if (!User.Identity.IsAuthenticated)
+{
+    <div class="text-center mb-4 mt-3">
+        <h2 style="font-weight: 600;">Welcome to the Library</h2>
+        <p class="text-muted">A library management system for books, toys, and music</p>
+    </div>
 
-<div class="row text-center">
-    <div class="col-md-4 mb-3">
-        <div class="card h-100 border-primary home-card">
-            <div class="card-body py-4">
-                <h5 class="card-title text-primary" style="font-weight: 600;">Books</h5>
-                <p class="display-5 text-primary mb-3" style="font-weight: 500;">@DbContext.Books.Count(b => b.Status != LibrarySystem.Models.ItemStatus.Destroyed && b.Status != LibrarySystem.Models.ItemStatus.Lost)</p>
-                <a asp-controller="Portal" asp-action="Random" asp-route-type="book" class="btn btn-outline-primary">Discover a book</a>
-            </div>
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6">
+            <a asp-controller="Portal" asp-action="Index" class="dashboard-tile tile-accent-blue">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Library Portal</div>
+                        <p class="tile-desc">Search and browse the full catalogue</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6">
+            <a asp-controller="Kiosk" asp-action="Index" class="dashboard-tile tile-accent-green">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Self-Service Kiosk</div>
+                        <p class="tile-desc">Borrow items and check your account</p>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card h-100 border-primary home-card">
-            <div class="card-body py-4">
-                <h5 class="card-title text-primary" style="font-weight: 600;">Toys</h5>
-                <p class="display-5 text-primary mb-3" style="font-weight: 500;">@DbContext.Toys.Count(t => t.Status != LibrarySystem.Models.ItemStatus.Destroyed && t.Status != LibrarySystem.Models.ItemStatus.Lost)</p>
-                <a asp-controller="Portal" asp-action="Random" asp-route-type="toy" class="btn btn-outline-primary">Find a toy</a>
-            </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-4">
+            <a asp-controller="Portal" asp-action="Random" asp-route-type="book" class="dashboard-tile tile-accent-purple">
+                <div class="card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="tile-title">Books</div>
+                        <p class="tile-desc">
+                            @DbContext.Books.Count(b => b.Status != ItemStatus.Destroyed && b.Status != ItemStatus.Lost) in catalogue
+                        </p>
+                        <span class="btn btn-sm mt-auto mx-auto" style="border: 1px solid #6f42c1; color: #212529; border-radius: 20px; width: 100%; max-width: 200px; height: 50px; display: flex; align-items: center; justify-content: center;">Discover a book</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-4">
+            <a asp-controller="Portal" asp-action="Random" asp-route-type="toy" class="dashboard-tile tile-accent-teal">
+                <div class="card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="tile-title">Toys</div>
+                        <p class="tile-desc">
+                            @DbContext.Toys.Count(t => t.Status != ItemStatus.Destroyed && t.Status != ItemStatus.Lost) in catalogue
+                        </p>
+                        <span class="btn btn-sm mt-auto mx-auto" style="border: 1px solid #20c997; color: #212529; border-radius: 20px; width: 100%; max-width: 200px; height: 50px; display: flex; align-items: center; justify-content: center;">Find a toy</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-4">
+            <a asp-controller="Portal" asp-action="Random" asp-route-type="music" class="dashboard-tile tile-accent-orange">
+                <div class="card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="tile-title">Music</div>
+                        <p class="tile-desc">
+                            @DbContext.Music.Count(m => m.Status != ItemStatus.Destroyed && m.Status != ItemStatus.Lost) in catalogue
+                        </p>
+                        <span class="btn btn-sm mt-auto mx-auto" style="border: 1px solid #fd7e14; color: #212529; border-radius: 20px; width: 100%; max-width: 200px; height: 50px; display: flex; align-items: center; justify-content: center;">Listen to something new</span>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card h-100 border-primary home-card">
-            <div class="card-body py-4">
-                <h5 class="card-title text-primary" style="font-weight: 600;">Music</h5>
-                <p class="display-5 text-primary mb-3" style="font-weight: 500;">@DbContext.Music.Count(m => m.Status != LibrarySystem.Models.ItemStatus.Destroyed && m.Status != LibrarySystem.Models.ItemStatus.Lost)</p>
-                <a asp-controller="Portal" asp-action="Random" asp-route-type="music" class="btn btn-outline-primary">Listen to something new</a>
-            </div>
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="section-label mt-2">Administration</div>
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-3">
+            <a asp-controller="Books" asp-action="Index" class="dashboard-tile tile-accent-blue">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Books</div>
+                        <p class="tile-desc">Manage book records</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a asp-controller="Toys" asp-action="Index" class="dashboard-tile tile-accent-green">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Toys</div>
+                        <p class="tile-desc">Manage toy records</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a asp-controller="Music" asp-action="Index" class="dashboard-tile tile-accent-purple">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Music</div>
+                        <p class="tile-desc">Manage music records</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a asp-controller="Notifications" asp-action="Index" class="dashboard-tile tile-accent-orange">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Notifications</div>
+                        <p class="tile-desc">View notification log</p>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
-</div>
+}
+
+@if (User.IsInRole("Reception"))
+{
+    <div class="section-label mt-2">Reception</div>
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-4">
+            <a asp-controller="Borrowers" asp-action="Index" class="dashboard-tile tile-accent-blue">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Members</div>
+                        <p class="tile-desc">Manage borrower accounts</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4">
+            <a asp-controller="Loans" asp-action="Borrow" class="dashboard-tile tile-accent-green">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">New Loan</div>
+                        <p class="tile-desc">Process a new borrowing</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4">
+            <a asp-controller="Loans" asp-action="Index" class="dashboard-tile tile-accent-teal">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Loan History</div>
+                        <p class="tile-desc">View all loan records</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4">
+            <a asp-controller="Branches" asp-action="Inventory" class="dashboard-tile tile-accent-purple">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Branch Inventory</div>
+                        <p class="tile-desc">View items by branch</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4">
+            <a asp-controller="ItemTransfers" asp-action="Index" class="dashboard-tile tile-accent-red">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Item Transfers</div>
+                        <p class="tile-desc">Request and manage transfers</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4">
+            <a asp-controller="Notifications" asp-action="Index" class="dashboard-tile tile-accent-orange">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Notifications</div>
+                        <p class="tile-desc">View notification log</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+}
+
+@if (User.IsInRole("Manager"))
+{
+    <div class="section-label mt-2">Management</div>
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-3">
+            <a asp-controller="Manager" asp-action="Index" class="dashboard-tile tile-accent-blue">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Dashboard</div>
+                        <p class="tile-desc">Statistics and reports</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a asp-controller="Branches" asp-action="Inventory" class="dashboard-tile tile-accent-green">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Branch Inventory</div>
+                        <p class="tile-desc">View items by branch</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a asp-controller="ItemTransfers" asp-action="Index" class="dashboard-tile tile-accent-purple">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Item Transfers</div>
+                        <p class="tile-desc">Oversee branch transfers</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a asp-controller="Notifications" asp-action="Index" class="dashboard-tile tile-accent-orange">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="tile-title">Notifications</div>
+                        <p class="tile-desc">View notification log</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+}

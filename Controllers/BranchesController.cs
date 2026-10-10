@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Controllers
 {
-    [Authorize(Roles = "Reception,Manager")] // Design choice to only allow Reception and Manager (STAFF)
+    [Authorize(Roles = "Reception,Manager")]
     public class BranchesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -18,32 +18,38 @@ namespace LibrarySystem.Controllers
         }
 
         // GET: Branches/Inventory
-        public async Task<IActionResult> Inventory(int? branchId)
+        public async Task<IActionResult> Inventory(int? branchId, string? type)
         {
-            var branches = await _context.Branches // Gets the three branches
+            var branches = await _context.Branches
                 .AsNoTracking()
                 .OrderBy(b => b.Name)
                 .ToListAsync();
 
-            var query = _context.Items // Gets the library inventory and its associated branch
+            var query = _context.Items
                 .Include(i => i.Branch)
                 .AsNoTracking()
                 .AsQueryable();
 
-            if (branchId.HasValue) // branch filtering option - besically, nothing selected = show all, 1 = darwin, 2 = sydney, 3 = brisbane (Inventory)
+            if (branchId.HasValue)
             {
                 query = query.Where(i => i.BranchId == branchId.Value);
             }
 
-            var items = await query
+            var allItems = await query
                 .OrderBy(i => i.Name)
                 .ToListAsync();
+
+            if (!string.IsNullOrEmpty(type))
+            {
+                allItems = allItems.Where(i => i.GetType().Name == type).ToList();
+            }
 
             var viewModel = new BranchInventoryViewModel
             {
                 SelectedBranchId = branchId,
+                SelectedType = type,
                 Branches = branches,
-                Items = items.Select(i => new BranchInventoryItemViewModel
+                Items = allItems.Select(i => new BranchInventoryItemViewModel
                 {
                     Id = i.Id,
                     LibraryCode = i.LibraryCode,

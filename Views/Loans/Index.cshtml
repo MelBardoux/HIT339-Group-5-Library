@@ -68,12 +68,11 @@
                 <td>
                     @if (loan.ReturnedDate == null)
                     {
-                        <a asp-action="Return" asp-route-id="@loan.Id">Return</a>
+                        <a asp-action="Return" asp-route-id="@loan.Id" class="btn btn-sm btn-outline-secondary me-1 mb-1 text-center" style="width: 80px;">Return</a>
                     }
                     @if (loan.Fine > 0)
                     {
-                        <text> | </text>
-                        <a asp-action="PayFine" asp-route-id="@loan.Id">Pay Fine</a>
+                        <a asp-action="PayFine" asp-route-id="@loan.Id" class="btn btn-sm btn-outline-danger me-1 mb-1 text-center" style="width: 80px;">Pay Fine</a>
                     }
                 </td>
             </tr>
