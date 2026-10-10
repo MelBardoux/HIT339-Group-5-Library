@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using LibrarySystem.Data;
+﻿using LibrarySystem.Data;
 using LibrarySystem.Models;
 using LibrarySystem.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Operations;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Controllers
 {
@@ -16,7 +17,7 @@ namespace LibrarySystem.Controllers
         }
 
         // GET: Portal
-        public async Task<IActionResult> Index(string? searchTerm, string? tab, int? genreId, int? typeId, int? formatId, string? sort)
+        public async Task<IActionResult> Index(string? searchTerm, string? tab, int? genreId, int? typeId, int? formatId, string? sort, int? branchId)
         {
             var viewModel = new PortalViewModel
             {
@@ -25,7 +26,8 @@ namespace LibrarySystem.Controllers
                 SelectedGenreId = genreId,
                 SelectedTypeId = typeId,
                 SelectedFormatId = formatId,
-                SelectedSort = sort ?? "name"
+                SelectedSort = sort ?? "name",
+                SelectedBranchId = branchId
             };
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -38,10 +40,11 @@ namespace LibrarySystem.Controllers
             viewModel.BookGenres = await _context.BookGenres.OrderBy(g => g.Name).ToListAsync();
             viewModel.ToyTypes = await _context.ToyTypes.OrderBy(t => t.Name).ToListAsync();
             viewModel.MusicFormats = await _context.MusicFormats.OrderBy(f => f.Name).ToListAsync();
+            viewModel.Branches = await _context.Branches.OrderBy(b => b.Name).ToListAsync();
 
-            viewModel.Books = await GetBooks(genreId, sort ?? "name");
-            viewModel.Toys = await GetToys(typeId, sort ?? "name");
-            viewModel.Music = await GetMusic(formatId, sort ?? "name");
+            viewModel.Books = await GetBooks(genreId, sort ?? "name", branchId);
+            viewModel.Toys = await GetToys(typeId, sort ?? "name", branchId);
+            viewModel.Music = await GetMusic(formatId, sort ?? "name", branchId);
 
             return View(viewModel);
         }
@@ -162,8 +165,9 @@ namespace LibrarySystem.Controllers
             var term = searchTerm.Trim().ToLower();
 
             var books = await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Genres)
+    .Include(b => b.Author)
+    .Include(b => b.Genres)
+    .Include(b => b.Branch)
                 .Where(b => b.Status != ItemStatus.Destroyed && b.Status != ItemStatus.Lost)
                 .Where(b =>
                     b.Name.ToLower().Contains(term) ||
@@ -178,12 +182,14 @@ namespace LibrarySystem.Controllers
                     Name = b.Name,
                     Type = "Book",
                     Status = b.Status.ToString(),
-                    Summary = "By " + b.Author.Name + (b.PublicationYear != null ? " (" + b.PublicationYear + ")" : "")
+                    Summary = "By " + b.Author.Name + (b.PublicationYear != null ? " (" + b.PublicationYear + ")" : ""),
+                    BranchName = b.Branch.Name
                 })
                 .ToListAsync();
 
             var toys = await _context.Toys
                 .Include(t => t.Types)
+                .Include(t => t.Branch)
                 .Where(t => t.Status != ItemStatus.Destroyed && t.Status != ItemStatus.Lost)
                 .Where(t =>
                     t.Name.ToLower().Contains(term) ||
@@ -197,13 +203,15 @@ namespace LibrarySystem.Controllers
                     Name = t.Name,
                     Type = "Toy",
                     Status = t.Status.ToString(),
-                    Summary = "Ages " + t.MinimumAge + "+"
+                    Summary = "Ages " + t.MinimumAge + "+",
+                    BranchName = t.Branch.Name
                 })
                 .ToListAsync();
 
             var music = await _context.Music
-                .Include(m => m.Artists)
-                .Include(m => m.Genres)
+    .Include(m => m.Artists)
+    .Include(m => m.Genres)
+    .Include(m => m.Branch)
                 .Where(m => m.Status != ItemStatus.Destroyed && m.Status != ItemStatus.Lost)
                 .Where(m =>
                     m.Name.ToLower().Contains(term) ||
@@ -219,23 +227,27 @@ namespace LibrarySystem.Controllers
                     Name = m.Name,
                     Type = "Music",
                     Status = m.Status.ToString(),
-                    Summary = m.AlbumTitle + " - " + string.Join(", ", m.Artists.Select(a => a.Name))
+                    Summary = m.AlbumTitle + " - " + string.Join(", ", m.Artists.Select(a => a.Name)),
+                    BranchName = m.Branch.Name
                 })
                 .ToListAsync();
 
             return books.Concat(toys).Concat(music).OrderBy(r => r.Name).ToList();
         }
 
-        private async Task<List<PortalBookViewModel>> GetBooks(int? genreId, string sort)
+        private async Task<List<PortalBookViewModel>> GetBooks(int? genreId, string sort, int? branchId)
         {
             var query = _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Genres)
+    .Include(b => b.Author)
+    .Include(b => b.Genres)
+    .Include(b => b.Branch)
                 .Where(b => b.Status != ItemStatus.Destroyed && b.Status != ItemStatus.Lost)
                 .AsQueryable();
 
             if (genreId.HasValue)
                 query = query.Where(b => b.Genres.Any(g => g.Id == genreId));
+            if (branchId.HasValue)
+                query = query.Where(b => b.BranchId == branchId.Value);
 
             var books = await query.Select(b => new PortalBookViewModel
             {
@@ -245,6 +257,7 @@ namespace LibrarySystem.Controllers
                 AuthorName = b.Author.Name,
                 PublicationYear = b.PublicationYearUnknown ? "Unknown" : b.PublicationYear.ToString(),
                 Status = b.Status.ToString(),
+                BranchName = b.Branch.Name,
                 Genres = b.Genres.Select(g => g.Name).ToList()
             }).ToListAsync();
 
@@ -256,15 +269,19 @@ namespace LibrarySystem.Controllers
             };
         }
 
-        private async Task<List<PortalToyViewModel>> GetToys(int? typeId, string sort)
+        private async Task<List<PortalToyViewModel>> GetToys(int? typeId, string sort, int? branchId)
         {
             var query = _context.Toys
-                .Include(t => t.Types)
+    .Include(t => t.Types)
+    .Include(t => t.Branch)
                 .Where(t => t.Status != ItemStatus.Destroyed && t.Status != ItemStatus.Lost)
                 .AsQueryable();
 
             if (typeId.HasValue)
                 query = query.Where(t => t.Types.Any(tt => tt.Id == typeId));
+
+            if (branchId.HasValue)
+                query = query.Where(t => t.BranchId == branchId.Value);
 
             var toys = await query.Select(t => new PortalToyViewModel
             {
@@ -274,6 +291,7 @@ namespace LibrarySystem.Controllers
                 AgeDisplay = t.AgeDisplay,
                 BatteryRequired = t.BatteryRequired,
                 Status = t.Status.ToString(),
+                BranchName = t.Branch.Name,
                 Types = t.Types.Select(tt => tt.Name).ToList()
             }).ToListAsync();
 
@@ -284,17 +302,21 @@ namespace LibrarySystem.Controllers
             };
         }
 
-        private async Task<List<PortalMusicViewModel>> GetMusic(int? formatId, string sort)
+        private async Task<List<PortalMusicViewModel>> GetMusic(int? formatId, string sort, int? branchId)
         {
             var query = _context.Music
-                .Include(m => m.Artists)
-                .Include(m => m.Genres)
-                .Include(m => m.Formats)
+    .Include(m => m.Artists)
+    .Include(m => m.Genres)
+    .Include(m => m.Formats)
+    .Include(m => m.Branch)
                 .Where(m => m.Status != ItemStatus.Destroyed && m.Status != ItemStatus.Lost)
                 .AsQueryable();
 
             if (formatId.HasValue)
                 query = query.Where(m => m.Formats.Any(f => f.Id == formatId));
+
+            if (branchId.HasValue)
+                query = query.Where(m => m.BranchId == branchId.Value);
 
             var musicItems = await query.Select(m => new PortalMusicViewModel
             {
@@ -305,6 +327,7 @@ namespace LibrarySystem.Controllers
                 Artists = string.Join(", ", m.Artists.Select(a => a.Name)),
                 ReleaseYear = m.ReleaseYearUnknown ? "Unknown" : m.ReleaseYear.ToString(),
                 Status = m.Status.ToString(),
+                BranchName = m.Branch.Name,
                 Formats = m.Formats.Select(f => f.Name).ToList(),
                 Genres = m.Genres.Select(g => g.Name).ToList()
             }).ToListAsync();
