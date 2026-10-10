@@ -123,6 +123,51 @@ namespace LibrarySystem.Controllers
                 return RedirectToAction(nameof(Checkout), new { card });
             }
 
+            // Redirect to confirmation page before finalising
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var confirm = new KioskConfirmViewModel
+            {
+                LibraryCard = card,
+                ItemCode = item.LibraryCode,
+                ItemName = item.Name,
+                ItemType = item.GetType().Name,
+                DueDate = today.AddDays(LoanDays).ToString("dddd d MMMM yyyy"),
+                IsReservation = reservation != null
+            };
+
+            TempData["ConfirmData"] = System.Text.Json.JsonSerializer.Serialize(confirm);
+            return RedirectToAction(nameof(Confirm), new { card });
+        }
+
+        // GET: /Kiosk/Confirm - shows item details before finalising checkout
+        public IActionResult Confirm(string card)
+        {
+            var json = TempData["ConfirmData"] as string;
+            if (string.IsNullOrEmpty(json))
+                return RedirectToAction(nameof(Checkout), new { card });
+
+            var viewModel = System.Text.Json.JsonSerializer.Deserialize<KioskConfirmViewModel>(json);
+            return View(viewModel);
+        }
+
+        // POST: /Kiosk/Confirm - finalises the checkout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Confirm(KioskConfirmViewModel viewModel)
+        {
+            var borrower = await _context.Borrowers
+                .FirstOrDefaultAsync(b => b.LibraryCard == viewModel.LibraryCard);
+            var item = await _context.Items
+                .FirstOrDefaultAsync(i => i.LibraryCode == viewModel.ItemCode);
+
+            if (borrower == null || item == null)
+                return RedirectToAction(nameof(Index));
+
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(r => r.ItemId == item.Id
+                                       && r.BorrowerId == borrower.Id
+                                       && r.Status == ReservationStatus.Ready);
+
             var today = DateOnly.FromDateTime(DateTime.Now);
             var loan = new Loan
             {
@@ -134,20 +179,135 @@ namespace LibrarySystem.Controllers
                 DueDate = today.AddDays(LoanDays)
             };
 
-            // Mark the reservation as collected if one exists
             if (reservation != null)
             {
                 reservation.Status = ReservationStatus.Collected;
             }
+
             item.Status = ItemStatus.Borrowed;
             _context.Loans.Add(loan);
-            await _context.SaveChangesAsync();   // save first so the loan has an Id
+            await _context.SaveChangesAsync();
 
             _notifications.NotifyItemBorrowed(loan);
             await _context.SaveChangesAsync();
 
-            TempData["KioskSuccess"] = $"✓ {item.Name} checked out. Due back {loan.DueDate:dddd d MMMM}.";
-            return RedirectToAction(nameof(Checkout), new { card });
+            TempData["KioskSuccess"] = $"{item.Name} checked out. Due back {loan.DueDate:dddd d MMMM}.";
+            return RedirectToAction(nameof(Checkout), new { card = viewModel.LibraryCard });
+        }
+
+        // GET: /Kiosk/Return?card=BRW-0001
+        public async Task<IActionResult> Return(string card)
+        {
+            var borrower = await GetBorrowerSummaryAsync(card);
+            if (borrower == null) return RedirectToAction(nameof(Index));
+
+            var viewModel = new KioskReturnViewModel
+            {
+                Borrower = borrower
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: /Kiosk/Return - item scanned for return
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Return(string card, string itemCode)
+        {
+            var borrower = await _context.Borrowers
+                .FirstOrDefaultAsync(b => b.LibraryCard == card);
+            if (borrower == null) return RedirectToAction(nameof(Index));
+
+            var code = (itemCode ?? "").Trim().ToUpper();
+            var loan = await _context.Loans
+                .Include(l => l.Item).ThenInclude(i => i.Branch)
+                .Include(l => l.Borrower)
+                .FirstOrDefaultAsync(l => l.Item.LibraryCode == code
+                                       && l.BorrowerId == borrower.Id
+                                       && l.ReturnedDate == null);
+
+            if (loan == null)
+            {
+                TempData["KioskError"] = $"No active loan found for \"{code}\" on your account.";
+                return RedirectToAction(nameof(Return), new { card });
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var fine = Loan.CalculateFine(loan.DueDate, today);
+
+            loan.ReturnedDate = today;
+            loan.Fine = fine > 0 ? fine : null;
+
+            var hasCrossBranchWarning = false;
+
+            // Check for next reservation
+            var nextReservation = await _context.Reservations
+                .Include(r => r.Borrower)
+                .Where(r => r.ItemId == loan.ItemId && r.Status == ReservationStatus.Waiting)
+                .OrderBy(r => r.QueuePosition)
+                .FirstOrDefaultAsync();
+
+            if (nextReservation != null)
+            {
+                if (loan.Item.BranchId == nextReservation.BranchId)
+                {
+                    nextReservation.Status = ReservationStatus.Ready;
+                    nextReservation.NotifiedAt = DateTime.Now;
+                    nextReservation.ExpiresAt = DateTime.Now.AddHours(48);
+                    loan.Item.Status = ItemStatus.Reserved;
+                    loan.Item.ReservedForBorrowerId = nextReservation.BorrowerId;
+                    _notifications.NotifyItemAvailable(nextReservation.Borrower, loan.Item);
+                }
+                else
+                {
+                    // Cross-branch reservation: kiosk cannot create transfers
+                    hasCrossBranchWarning = true;
+                    loan.Item.Status = ItemStatus.Available;
+                    loan.Item.ReservedForBorrowerId = null;
+                    TempData["KioskWarning"] = $"{loan.Item.Name} has a reservation at another branch. Please hand this item to staff so they can arrange the transfer.";
+                }
+            }
+            else
+            {
+                loan.Item.Status = ItemStatus.Available;
+                loan.Item.ReservedForBorrowerId = null;
+            }
+
+            if (fine > 0)
+            {
+                loan.Borrower.Status = BorrowerStatus.Suspended;
+                _notifications.NotifyFineCharged(loan);
+            }
+
+            await _context.SaveChangesAsync();
+            if (!hasCrossBranchWarning)
+            {
+                var result = fine > 0
+                    ? $"{loan.Item.Name} returned. A late fee of {fine:C} has been applied."
+                    : $"{loan.Item.Name} returned successfully.";
+                TempData["KioskSuccess"] = result;
+            }
+            return RedirectToAction(nameof(Return), new { card });
+        }
+
+        // GET: /Kiosk/Receipt?card=BRW-0001
+        public async Task<IActionResult> Receipt(string card)
+        {
+            var borrower = await GetBorrowerSummaryAsync(card);
+            if (borrower == null) return RedirectToAction(nameof(Index));
+
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var viewModel = new KioskCheckoutViewModel
+            {
+                Borrower = borrower,
+                CheckedOutToday = await LoanRows(_context.Loans
+                        .Where(l => l.Borrower.LibraryCard == card
+                                 && l.BorrowedDate == today
+                                 && l.ReturnedDate == null))
+                    .ToListAsync()
+            };
+
+            return View(viewModel);
         }
 
         // GET: /Kiosk/Account?card=BRW-0001

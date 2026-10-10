@@ -52,5 +52,5 @@
 
 <div class="d-flex gap-3">
     <a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-outline-primary btn-touch flex-fill">Back</a>
-    <a asp-action="Index" class="btn btn-primary btn-touch flex-fill">Done</a>
+        <a asp-action="Receipt" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-primary btn-touch flex-fill">Finish borrowing</a>
 </div>

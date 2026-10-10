@@ -1,0 +1,35 @@
+﻿@model LibrarySystem.ViewModels.KioskReturnViewModel
+@{
+    ViewData["Title"] = "Return Items";
+}
+<partial name="_BorrowerBanner" model="Model.Borrower" />
+
+@if (TempData["KioskSuccess"] != null)
+{
+    <div class="alert alert-success fs-5">@TempData["KioskSuccess"]</div>
+}
+@if (TempData["KioskWarning"] != null)
+{
+    <div class="alert alert-warning fs-5">@TempData["KioskWarning"]</div>
+}
+@if (TempData["KioskError"] != null)
+{
+    <div class="alert alert-danger">@TempData["KioskError"]</div>
+}
+
+<div class="card border-primary mb-4">
+    <div class="card-body p-4 text-center">
+        <h5 class="card-title text-primary mb-3" style="font-weight: 600;">Scan the barcode on the item to return</h5>
+        <form asp-action="Return" method="post">
+            <input type="hidden" name="card" value="@Model.Borrower.LibraryCard" />
+            <input id="itemCode" name="itemCode" class="form-control kiosk-input mb-3"
+                   placeholder="e.g. BKS-0005" autocomplete="off" autofocus required />
+            <button type="submit" class="btn btn-primary btn-touch w-100">Return item</button>
+        </form>
+    </div>
+</div>
+
+<div class="d-flex gap-3">
+    <a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-outline-primary btn-touch flex-fill">Back</a>
+        <a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-primary btn-touch flex-fill">Done</a>
+</div>

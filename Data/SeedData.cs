@@ -1532,12 +1532,12 @@ namespace LibrarySystem.Data
                     var brisbaneBranch2 = await context.Branches.FirstAsync(b => b.Name == "Brisbane");
 
                     context.Reservations.AddRange(
-                        // Noah in Sydney reserved at Sydney branch
+                        // Noah in Sydney reserved at Darwin branch (cross-branch test)
                         new Reservation
                         {
                             ItemId = andThenItem.Id,
                             BorrowerId = noahBorrower.Id,
-                            BranchId = sydneyBranch2.Id,
+                            BranchId = darwinBranch.Id,
                             PlacedAt = DateTime.Now.AddDays(-2),
                             QueuePosition = 1,
                             Status = ReservationStatus.Waiting
