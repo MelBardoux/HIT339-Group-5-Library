@@ -916,6 +916,652 @@ namespace LibrarySystem.Data
                     }
                 );
                 await context.SaveChangesAsync();
+
+                // Seed Sydney and Brisbane data
+                var sydneyBranch = await context.Branches.FirstOrDefaultAsync(b => b.Name == "Sydney");
+                var brisbaneBranch = await context.Branches.FirstOrDefaultAsync(b => b.Name == "Brisbane");
+
+                if (sydneyBranch == null || brisbaneBranch == null)
+                {
+                    throw new InvalidOperationException("Sydney and Brisbane branches must exist before seeding branch data.");
+                }
+
+                // Seed Sydney Borrowers
+                if (!context.Borrowers.Any(b => b.LibraryCard == "BRW-0007"))
+                {
+                    context.Borrowers.AddRange(
+                        new Borrower
+                        {
+                            LibraryCard = "BRW-0007",
+                            Name = "Liam Nguyen",
+                            DateOfBirth = new DateOnly(1992, 5, 10),
+                            Email = "liam.nguyen@email.com",
+                            Phone = "0478901234",
+                            Address = "14 George Street, Sydney",
+                            Status = BorrowerStatus.Active
+                        },
+                        new Borrower
+                        {
+                            LibraryCard = "BRW-0008",
+                            Name = "Olivia Patel",
+                            DateOfBirth = new DateOnly(1988, 9, 25),
+                            Email = "olivia.patel@email.com",
+                            Phone = "0489012345",
+                            Address = "67 Pitt Street, Sydney",
+                            Status = BorrowerStatus.Active
+                        },
+                        new Borrower
+                        {
+                            LibraryCard = "BRW-0009",
+                            Name = "Noah Campbell",
+                            DateOfBirth = new DateOnly(2005, 2, 14),
+                            Email = "noah.campbell@email.com",
+                            Phone = "0490123456",
+                            Address = "23 Crown Street, Surry Hills",
+                            Status = BorrowerStatus.Active
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Brisbane Borrowers
+                if (!context.Borrowers.Any(b => b.LibraryCard == "BRW-0010"))
+                {
+                    context.Borrowers.AddRange(
+                        new Borrower
+                        {
+                            LibraryCard = "BRW-0010",
+                            Name = "Charlotte Wu",
+                            DateOfBirth = new DateOnly(1996, 4, 8),
+                            Email = "charlotte.wu@email.com",
+                            Phone = "0401234567",
+                            Address = "45 Queen Street, Brisbane",
+                            Status = BorrowerStatus.Active
+                        },
+                        new Borrower
+                        {
+                            LibraryCard = "BRW-0011",
+                            Name = "James O'Brien",
+                            DateOfBirth = new DateOnly(1983, 11, 19),
+                            Email = "james.obrien@email.com",
+                            Phone = "0412345670",
+                            Address = "12 Adelaide Street, Brisbane",
+                            Status = BorrowerStatus.Active
+                        },
+                        new Borrower
+                        {
+                            LibraryCard = "BRW-0012",
+                            Name = "Amara Singh",
+                            DateOfBirth = new DateOnly(2001, 7, 30),
+                            Email = "amara.singh@email.com",
+                            Phone = "0423456701",
+                            Address = "88 Boundary Street, West End",
+                            Status = BorrowerStatus.Suspended
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Sydney Books
+                if (!context.Books.Any(b => b.LibraryCode == "BKS-0011"))
+                {
+                    var authors = context.Authors.ToList();
+                    var genres = context.BookGenres.ToList();
+
+                    context.Books.AddRange(
+                        new Book
+                        {
+                            Name = "The Lord of the Rings",
+                            Description = "An epic high-fantasy novel following the quest to destroy the One Ring.",
+                            LibraryCode = "BKS-0011",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-40)),
+                            PublicationYear = 1954,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "J.R.R. Tolkien").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Fantasy") }
+                        },
+                        new Book
+                        {
+                            Name = "And Then There Were None",
+                            Description = "A mystery novel about ten strangers lured to an island.",
+                            LibraryCode = "BKS-0012",
+                            Status = ItemStatus.Borrowed,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-35)),
+                            PublicationYear = 1939,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Agatha Christie").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Mystery") }
+                        },
+                        new Book
+                        {
+                            Name = "Sense and Sensibility",
+                            Description = "A novel about the Dashwood sisters navigating love and society.",
+                            LibraryCode = "BKS-0013",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-30)),
+                            PublicationYear = 1811,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Jane Austen").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Romance") }
+                        },
+                        new Book
+                        {
+                            Name = "Diary of a Wimpy Kid: Rodrick Rules",
+                            Description = "The second book in the Diary of a Wimpy Kid series.",
+                            LibraryCode = "BKS-0014",
+                            Status = ItemStatus.Borrowed,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-25)),
+                            PublicationYear = 2008,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Jeff Kinney").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Children's") }
+                        },
+                        new Book
+                        {
+                            Name = "Dune Messiah",
+                            Description = "The second novel in the Dune saga.",
+                            LibraryCode = "BKS-0015",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-20)),
+                            PublicationYear = 1969,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Frank Herbert").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Science Fiction") }
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Sydney Toys
+                if (!context.Toys.Any(t => t.LibraryCode == "TOY-0012"))
+                {
+                    var toyTypes = context.ToyTypes.ToList();
+
+                    context.Toys.AddRange(
+                        new Toy
+                        {
+                            Name = "Chess Set",
+                            Description = "A classic wooden chess set for two players.",
+                            LibraryCode = "TOY-0012",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-30)),
+                            MinimumAge = 6,
+                            BatteryRequired = false,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Board Game") }
+                        },
+                        new Toy
+                        {
+                            Name = "LEGO Technic Crane",
+                            Description = "An advanced building set featuring a working crane mechanism.",
+                            LibraryCode = "TOY-0013",
+                            Status = ItemStatus.Borrowed,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-25)),
+                            MinimumAge = 10,
+                            BatteryRequired = false,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Building Set") }
+                        },
+                        new Toy
+                        {
+                            Name = "Drone Explorer",
+                            Description = "A beginner-friendly drone with camera.",
+                            LibraryCode = "TOY-0014",
+                            Status = ItemStatus.Damaged,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-20)),
+                            MinimumAge = 12,
+                            BatteryRequired = true,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Electronic"), toyTypes.First(t => t.Name == "Outdoor") }
+                        },
+                        new Toy
+                        {
+                            Name = "Jigsaw Puzzle 1000pc",
+                            Description = "A 1000-piece jigsaw puzzle of the Sydney Opera House.",
+                            LibraryCode = "TOY-0015",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-15)),
+                            MinimumAge = 8,
+                            BatteryRequired = false,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Puzzle") }
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Sydney Music
+                if (!context.Music.Any(m => m.LibraryCode == "MUS-0010"))
+                {
+                    var artists = context.Artists.ToList();
+                    var musicGenres = context.MusicGenres.ToList();
+                    var formats = context.MusicFormats.ToList();
+
+                    context.Music.AddRange(
+                        new Music
+                        {
+                            Name = "Let It Be",
+                            Description = "The twelfth and final studio album by The Beatles.",
+                            LibraryCode = "MUS-0010",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-30)),
+                            AlbumTitle = "Let It Be",
+                            ReleaseYear = 1970,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "The Beatles") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "Rock") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "Vinyl"), formats.First(f => f.Name == "CD") }
+                        },
+                        new Music
+                        {
+                            Name = "Bad",
+                            Description = "The seventh studio album by Michael Jackson.",
+                            LibraryCode = "MUS-0011",
+                            Status = ItemStatus.Borrowed,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-25)),
+                            AlbumTitle = "Bad",
+                            ReleaseYear = 1987,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "Michael Jackson") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "Pop") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "CD") }
+                        },
+                        new Music
+                        {
+                            Name = "Highway to Hell",
+                            Description = "The sixth studio album by AC/DC.",
+                            LibraryCode = "MUS-0012",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-20)),
+                            AlbumTitle = "Highway to Hell",
+                            ReleaseYear = 1979,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "AC/DC") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "Rock") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "Vinyl") }
+                        },
+                        new Music
+                        {
+                            Name = "Discovery",
+                            Description = "The second studio album by Daft Punk.",
+                            LibraryCode = "MUS-0013",
+                            Status = ItemStatus.Available,
+                            BranchId = sydneyBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-15)),
+                            AlbumTitle = "Discovery",
+                            ReleaseYear = 2001,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "Daft Punk") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "Electronic") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "CD"), formats.First(f => f.Name == "Vinyl") }
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Brisbane Books
+                if (!context.Books.Any(b => b.LibraryCode == "BKS-0016"))
+                {
+                    var authors = context.Authors.ToList();
+                    var genres = context.BookGenres.ToList();
+
+                    context.Books.AddRange(
+                        new Book
+                        {
+                            Name = "The Silmarillion",
+                            Description = "A collection of mythopoeic works by J.R.R. Tolkien.",
+                            LibraryCode = "BKS-0016",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-38)),
+                            PublicationYear = 1977,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "J.R.R. Tolkien").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Fantasy") }
+                        },
+                        new Book
+                        {
+                            Name = "The ABC Murders",
+                            Description = "A Hercule Poirot mystery novel by Agatha Christie.",
+                            LibraryCode = "BKS-0017",
+                            Status = ItemStatus.Borrowed,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-33)),
+                            PublicationYear = 1936,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Agatha Christie").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Mystery") }
+                        },
+                        new Book
+                        {
+                            Name = "Emma",
+                            Description = "A comic novel about youthful hubris and romantic misunderstandings.",
+                            LibraryCode = "BKS-0018",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-28)),
+                            PublicationYear = 1815,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Jane Austen").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Romance") }
+                        },
+                        new Book
+                        {
+                            Name = "Children of Dune",
+                            Description = "The third novel in the Dune saga.",
+                            LibraryCode = "BKS-0019",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-23)),
+                            PublicationYear = 1976,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Frank Herbert").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Science Fiction") }
+                        },
+                        new Book
+                        {
+                            Name = "21 Lessons for the 21st Century",
+                            Description = "A book exploring the challenges of the present day.",
+                            LibraryCode = "BKS-0020",
+                            Status = ItemStatus.Damaged,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-18)),
+                            PublicationYear = 2018,
+                            PublicationYearUnknown = false,
+                            AuthorId = authors.First(a => a.Name == "Yuval Noah Harari").Id,
+                            Genres = new List<BookGenre> { genres.First(g => g.Name == "Non-Fiction") }
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Brisbane Toys
+                if (!context.Toys.Any(t => t.LibraryCode == "TOY-0016"))
+                {
+                    var toyTypes = context.ToyTypes.ToList();
+
+                    context.Toys.AddRange(
+                        new Toy
+                        {
+                            Name = "Cluedo",
+                            Description = "The classic murder mystery board game.",
+                            LibraryCode = "TOY-0016",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-28)),
+                            MinimumAge = 8,
+                            BatteryRequired = false,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Board Game") }
+                        },
+                        new Toy
+                        {
+                            Name = "Batman Action Figure",
+                            Description = "A poseable Batman figure with cape and accessories.",
+                            LibraryCode = "TOY-0017",
+                            Status = ItemStatus.Borrowed,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-22)),
+                            MinimumAge = 4,
+                            BatteryRequired = false,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Action Figure") }
+                        },
+                        new Toy
+                        {
+                            Name = "Solar System Model Kit",
+                            Description = "An educational kit for building a scale model of the solar system.",
+                            LibraryCode = "TOY-0018",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-17)),
+                            MinimumAge = 8,
+                            BatteryRequired = false,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Educational") }
+                        },
+                        new Toy
+                        {
+                            Name = "Skipping Rope",
+                            Description = "An adjustable skipping rope for outdoor play.",
+                            LibraryCode = "TOY-0019",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-12)),
+                            MinimumAge = 5,
+                            BatteryRequired = false,
+                            Types = new List<ToyType> { toyTypes.First(t => t.Name == "Outdoor") }
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Brisbane Music
+                if (!context.Music.Any(m => m.LibraryCode == "MUS-0014"))
+                {
+                    var artists = context.Artists.ToList();
+                    var musicGenres = context.MusicGenres.ToList();
+                    var formats = context.MusicFormats.ToList();
+
+                    context.Music.AddRange(
+                        new Music
+                        {
+                            Name = "Sgt. Pepper's Lonely Hearts Club Band",
+                            Description = "The eighth studio album by The Beatles.",
+                            LibraryCode = "MUS-0014",
+                            Status = ItemStatus.Borrowed,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-28)),
+                            AlbumTitle = "Sgt. Pepper's Lonely Hearts Club Band",
+                            ReleaseYear = 1967,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "The Beatles") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "Rock") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "Vinyl") }
+                        },
+                        new Music
+                        {
+                            Name = "9 to 5 and Odd Jobs",
+                            Description = "A studio album by Dolly Parton featuring the hit single 9 to 5.",
+                            LibraryCode = "MUS-0015",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-22)),
+                            AlbumTitle = "9 to 5 and Odd Jobs",
+                            ReleaseYear = 1980,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "Dolly Parton") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "Country") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "Vinyl"), formats.First(f => f.Name == "Cassette") }
+                        },
+                        new Music
+                        {
+                            Name = "Sketches of Spain",
+                            Description = "A studio album blending jazz with Spanish folk music by Miles Davis.",
+                            LibraryCode = "MUS-0016",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-17)),
+                            AlbumTitle = "Sketches of Spain",
+                            ReleaseYear = 1960,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "Miles Davis") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "Jazz") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "Vinyl") }
+                        },
+                        new Music
+                        {
+                            Name = "Renaissance",
+                            Description = "The seventh studio album by Beyoncé.",
+                            LibraryCode = "MUS-0017",
+                            Status = ItemStatus.Available,
+                            BranchId = brisbaneBranch.Id,
+                            DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-12)),
+                            AlbumTitle = "Renaissance",
+                            ReleaseYear = 2022,
+                            ReleaseYearUnknown = false,
+                            Artists = new List<Artist> { artists.First(a => a.Name == "Beyoncé") },
+                            Genres = new List<MusicGenre> { musicGenres.First(g => g.Name == "R&B"), musicGenres.First(g => g.Name == "Electronic") },
+                            Formats = new List<MusicFormat> { formats.First(f => f.Name == "CD") }
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Sydney Loans
+                if (!context.Loans.Any(l => l.Item.BranchId == sydneyBranch.Id))
+                {
+                    var sydneyBorrowers = context.Borrowers.Where(b => b.Address.Contains("Sydney") || b.Address.Contains("Surry Hills")).ToList();
+                    var sydneyItems = context.Items.Where(i => i.BranchId == sydneyBranch.Id).ToList();
+
+                    var liam = sydneyBorrowers.First(b => b.Name == "Liam Nguyen");
+                    var olivia = sydneyBorrowers.First(b => b.Name == "Olivia Patel");
+                    var noah = sydneyBorrowers.First(b => b.Name == "Noah Campbell");
+
+                    var andThen = sydneyItems.First(i => i.LibraryCode == "BKS-0012");
+                    var rodrick = sydneyItems.First(i => i.LibraryCode == "BKS-0014");
+                    var legoTechnic = sydneyItems.First(i => i.LibraryCode == "TOY-0013");
+                    var bad = sydneyItems.First(i => i.LibraryCode == "MUS-0011");
+
+                    context.Loans.AddRange(
+                        new Loan
+                        {
+                            ItemId = andThen.Id,
+                            BorrowerId = liam.Id,
+                            BorrowedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-6)),
+                            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(8))
+                        },
+                        new Loan
+                        {
+                            ItemId = rodrick.Id,
+                            BorrowerId = noah.Id,
+                            BorrowedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-4)),
+                            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(10))
+                        },
+                        new Loan
+                        {
+                            ItemId = legoTechnic.Id,
+                            BorrowerId = olivia.Id,
+                            BorrowedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-3)),
+                            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(11))
+                        },
+                        new Loan
+                        {
+                            ItemId = bad.Id,
+                            BorrowerId = liam.Id,
+                            BorrowedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-10)),
+                            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-3)),
+                            Fine = 5.00m
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Brisbane Loans
+                if (!context.Loans.Any(l => l.Item.BranchId == brisbaneBranch.Id))
+                {
+                    var brisbaneBorrowers = context.Borrowers.Where(b => b.Address.Contains("Brisbane") || b.Address.Contains("West End")).ToList();
+                    var brisbaneItems = context.Items.Where(i => i.BranchId == brisbaneBranch.Id).ToList();
+
+                    var charlotte = brisbaneBorrowers.First(b => b.Name == "Charlotte Wu");
+                    var james = brisbaneBorrowers.First(b => b.Name == "James O'Brien");
+                    var amara = brisbaneBorrowers.First(b => b.Name == "Amara Singh");
+
+                    var abcMurders = brisbaneItems.First(i => i.LibraryCode == "BKS-0017");
+                    var batman = brisbaneItems.First(i => i.LibraryCode == "TOY-0017");
+                    var sgtPepper = brisbaneItems.First(i => i.LibraryCode == "MUS-0014");
+
+                    context.Loans.AddRange(
+                        new Loan
+                        {
+                            ItemId = abcMurders.Id,
+                            BorrowerId = james.Id,
+                            BorrowedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-5)),
+                            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(9))
+                        },
+                        new Loan
+                        {
+                            ItemId = batman.Id,
+                            BorrowerId = charlotte.Id,
+                            BorrowedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-3)),
+                            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(11))
+                        },
+                        new Loan
+                        {
+                            ItemId = sgtPepper.Id,
+                            BorrowerId = amara.Id,
+                            BorrowedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-8)),
+                            DueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+                            Fine = 3.00m
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed Reservations
+                if (!context.Reservations.Any())
+                {
+                    var allBorrowers = context.Borrowers.ToList();
+                    var allItems = context.Items.ToList();
+
+                    // Noah in Sydney wants "And Then There Were None" which Liam has borrowed
+                    var andThenItem = allItems.First(i => i.LibraryCode == "BKS-0012");
+                    var noahBorrower = allBorrowers.First(b => b.Name == "Noah Campbell");
+
+                    // Charlotte in Brisbane wants "The ABC Murders" which James has borrowed
+                    var abcItem = allItems.First(i => i.LibraryCode == "BKS-0017");
+                    var charlotteBorrower = allBorrowers.First(b => b.Name == "Charlotte Wu");
+
+                    // Olivia in Sydney wants "Thriller" which Alex has in Darwin (cross-branch scenario - item borrowed at Darwin, but Sydney has no copy)
+                    var thrillerItem = allItems.First(i => i.LibraryCode == "MUS-0002");
+                    var oliviaBorrower = allBorrowers.First(b => b.Name == "Olivia Patel");
+
+                    // Jane in Darwin wants "Dune" which Emily has borrowed (existing Darwin reservation)
+                    var duneItem = allItems.First(i => i.LibraryCode == "BKS-0006");
+                    var janeBorrower = allBorrowers.First(b => b.Name == "Jane Smith");
+
+                    context.Reservations.AddRange(
+                        new Reservation
+                        {
+                            ItemId = andThenItem.Id,
+                            BorrowerId = noahBorrower.Id,
+                            PlacedAt = DateTime.Now.AddDays(-2),
+                            QueuePosition = 1,
+                            Status = ReservationStatus.Waiting
+                        },
+                        new Reservation
+                        {
+                            ItemId = abcItem.Id,
+                            BorrowerId = charlotteBorrower.Id,
+                            PlacedAt = DateTime.Now.AddDays(-1),
+                            QueuePosition = 1,
+                            Status = ReservationStatus.Waiting
+                        },
+                        new Reservation
+                        {
+                            ItemId = thrillerItem.Id,
+                            BorrowerId = oliviaBorrower.Id,
+                            PlacedAt = DateTime.Now.AddDays(-3),
+                            QueuePosition = 1,
+                            Status = ReservationStatus.Waiting
+                        },
+                        new Reservation
+                        {
+                            ItemId = duneItem.Id,
+                            BorrowerId = janeBorrower.Id,
+                            PlacedAt = DateTime.Now.AddDays(-4),
+                            QueuePosition = 1,
+                            Status = ReservationStatus.Waiting
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
             }
         }
     }
