@@ -1,0 +1,175 @@
+@page "/MetadataLookup"
+@using LibrarySystem.Services
+@inject IExternalMetadataProvider MetadataProvider
+@inject IMetadataEnrichmentService EnrichmentService
+@{
+    ViewData["Title"] = "Metadata Lookup & Enrichment";
+}
+
+@* Note: This will be handled via AJAX calls from the Import preview view *@
+@* This file serves as documentation for the metadata endpoints *@
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>External Metadata Lookup</h2>
+            <p class="text-muted">Query external sources to enrich your CSV imports with additional metadata.</p>
+
+            <div class="alert alert-info">
+                <h6>Metadata Lookup API</h6>
+                <p class="mb-2">The following API endpoints are available for metadata queries:</p>
+                <ul class="small mb-0">
+                    <li><code>POST /api/metadatalookup/search-books</code> - Search for books</li>
+                    <li><code>POST /api/metadatalookup/search-music</code> - Search for music</li>
+                    <li><code>POST /api/metadatalookup/book/lookup</code> - Get book metadata by author/title</li>
+                    <li><code>POST /api/metadatalookup/music/lookup</code> - Get music metadata by artist/album</li>
+                    <li><code>POST /api/metadatalookup/enrich-book</code> - Enrich book with external data</li>
+                    <li><code>POST /api/metadatalookup/enrich-music</code> - Enrich music with external data</li>
+                    <li><code>POST /api/metadatalookup/enrich-batch</code> - Batch enrich multiple items</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Book Metadata Lookup</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Search Query</label>
+                        <input type="text" class="form-control" id="bookSearchQuery" placeholder="Enter title, author, or ISBN...">
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="searchBooks()">Search Books</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Music Metadata Lookup</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Search Query</label>
+                        <input type="text" class="form-control" id="musicSearchQuery" placeholder="Enter artist, album, or ISRC...">
+                    </div>
+                    <button class="btn btn-success w-100" onclick="searchMusic()">Search Music</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="searchResults" class="mt-4"></div>
+</div>
+
+@section Scripts {
+    <script>
+        async function searchBooks() {
+            const query = document.getElementById('bookSearchQuery').value;
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/metadatalookup/search-books', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+                displayResults(data, 'Book');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error searching books: ' + error.message);
+            }
+        }
+
+        async function searchMusic() {
+            const query = document.getElementById('musicSearchQuery').value;
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/metadatalookup/search-music', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+                displayResults(data, 'Music');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error searching music: ' + error.message);
+            }
+        }
+
+        function displayResults(data, type) {
+            const resultsDiv = document.getElementById('searchResults');
+            let html = '';
+
+            if (type === 'Book' && data.bookResults && data.bookResults.length > 0) {
+                html = `<div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Book Search Results (${data.resultCount})</h5>
+                    </div>
+                    <div class="card-body">`;
+
+                data.bookResults.forEach((book, index) => {
+                    html += `<div class="card mb-3">
+                        <div class="card-body">
+                            <h6>${book.title}</h6>
+                            <p class="mb-2"><small><strong>Author:</strong> ${book.authorName}</small></p>
+                            <p class="mb-2"><small><strong>ISBN:</strong> ${book.isbn13 || book.isbn || 'N/A'}</small></p>
+                            <p class="mb-2"><small><strong>Year:</strong> ${book.publicationYear || 'Unknown'}</small></p>
+                            <p class="mb-2"><small><strong>Rating:</strong> ${book.averageRating || 'N/A'} (${book.ratingCount || 0} ratings)</small></p>
+                            <p class="small text-muted">${book.description}</p>
+                            <span class="badge bg-secondary">${book.confidenceScore}</span>
+                        </div>
+                    </div>`;
+                });
+
+                html += `</div></div>`;
+            }
+            else if (type === 'Music' && data.musicResults && data.musicResults.length > 0) {
+                html = `<div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Music Search Results (${data.resultCount})</h5>
+                    </div>
+                    <div class="card-body">`;
+
+                data.musicResults.forEach((music, index) => {
+                    html += `<div class="card mb-3">
+                        <div class="card-body">
+                            <h6>${music.albumTitle}</h6>
+                            <p class="mb-2"><small><strong>Artist:</strong> ${music.artistName}</small></p>
+                            <p class="mb-2"><small><strong>Year:</strong> ${music.releaseYear || 'Unknown'}</small></p>
+                            <p class="mb-2"><small><strong>Rating:</strong> ${music.averageRating || 'N/A'} (${music.ratingCount || 0} ratings)</small></p>
+                            <p class="small text-muted">${music.description}</p>
+                            <span class="badge bg-secondary">${music.confidenceScore}</span>
+                        </div>
+                    </div>`;
+                });
+
+                html += `</div></div>`;
+            }
+            else {
+                html = `<div class="alert alert-warning">No results found for your search.</div>`;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+}

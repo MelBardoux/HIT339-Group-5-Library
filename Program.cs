@@ -23,6 +23,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
 
+// CSV Import service
+builder.Services.AddScoped<CsvImportService>();
+
+// External metadata provider and enrichment services
+builder.Services.AddScoped<IExternalMetadataProvider, MockExternalMetadataProvider>();
+builder.Services.AddScoped<IMetadataEnrichmentService, MetadataEnrichmentService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

@@ -1,0 +1,206 @@
+@model LibrarySystem.ViewModels.CsvImportViewModel
+
+@{
+    ViewData["Title"] = "CSV Bulk Import";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>@ViewData["Title"]</h2>
+            <p class="text-muted">Import books or media items in bulk using a CSV file.</p>
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Upload CSV File</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Preview" method="post" enctype="multipart/form-data">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <h4 class="alert-heading">Validation Errors</h4>
+                                <ul class="mb-0">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label for="ItemType" class="form-label">Item Type <span class="text-danger">*</span></label>
+                            <select class="form-select" asp-for="ItemType" id="ItemType">
+                                <option value="">-- Select Item Type --</option>
+                                <option value="Book" selected>Book</option>
+                                <option value="Music">Music</option>
+                            </select>
+                            <span asp-validation-for="ItemType" class="text-danger"></span>
+                            <small class="text-muted d-block mt-2">
+                                <strong>Book:</strong> Name, Description, LibraryCode, AuthorName, PublicationYear<br>
+                                <strong>Music:</strong> Name, Description, LibraryCode, AlbumTitle, ArtistName, ReleaseYear
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="BranchId" class="form-label">Branch <span class="text-danger">*</span></label>
+                            <select class="form-select" asp-for="BranchId" asp-items="@(new SelectList(Model.Branches, "Id", "Name"))">
+                                <option value="">-- Select Branch --</option>
+                            </select>
+                            <span asp-validation-for="BranchId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="File" class="form-label">CSV File <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input class="form-control" type="file" accept=".csv" asp-for="File" id="File">
+                                <span class="input-group-text">(.csv only)</span>
+                            </div>
+                            <span asp-validation-for="File" class="text-danger"></span>
+                            <small class="text-muted d-block mt-2">
+                                Maximum file size: 5MB. CSV must contain headers in the first row.
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Preview Import
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">CSV Format Guide</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Books Format:</h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr class="table-light">
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>LibraryCode</th>
+                                    <th>AuthorName</th>
+                                    <th>PublicationYear</th>
+                                    <th>Genre (Optional)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>The Great Gatsby</td>
+                                    <td>A classic American novel</td>
+                                    <td>BOO-0001</td>
+                                    <td>F. Scott Fitzgerald</td>
+                                    <td>1925</td>
+                                    <td>Fiction</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6>Music Format:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr class="table-light">
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>LibraryCode</th>
+                                    <th>AlbumTitle</th>
+                                    <th>ArtistName</th>
+                                    <th>ReleaseYear</th>
+                                    <th>Genre (Optional)</th>
+                                    <th>Format (Optional)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Abbey Road</td>
+                                    <td>Iconic album by The Beatles</td>
+                                    <td>MUS-0001</td>
+                                    <td>Abbey Road</td>
+                                    <td>The Beatles</td>
+                                    <td>1969</td>
+                                    <td>Rock</td>
+                                    <td>CD</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6 class="mt-3">Important Notes:</h6>
+                    <ul>
+                        <li>LibraryCode must follow the format: XXX-NNNN (3 uppercase letters, hyphen, 4 digits)</li>
+                        <li>LibraryCode must be unique across the system</li>
+                        <li>Authors/Artists will be created automatically if they don't exist</li>
+                        <li>Multiple genres or formats can be separated by semicolons (;)</li>
+                        <li>Empty cells for optional fields are acceptable</li>
+                        <li>Publication/Release year must be a valid 4-digit number or left empty</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h5 class="mb-0">Import Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Who can use this feature?</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Admin</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Manager</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Reception Staff</li>
+                    </ul>
+
+                    <hr>
+
+                    <p><strong>Download Sample Files:</strong></p>
+                    <div class="d-grid gap-2">
+                        <a href="~/sample-books.csv" class="btn btn-sm btn-outline-primary" download>
+                            <i class="bi bi-download"></i> Sample Books CSV
+                        </a>
+                        <a href="~/sample-music.csv" class="btn btn-sm btn-outline-primary" download>
+                            <i class="bi bi-download"></i> Sample Music CSV
+                        </a>
+                    </div>
+
+                    <hr>
+
+                    <p><strong>Process:</strong></p>
+                    <ol class="small">
+                        <li>Select item type (Book or Music)</li>
+                        <li>Choose destination branch</li>
+                        <li>Upload your CSV file</li>
+                        <li>Review the preview</li>
+                        <li>Confirm and import</li>
+                    </ol>
+
+                    <hr>
+
+                    <p><strong>Tips:</strong></p>
+                    <ul class="small list-unstyled">
+                        <li>✓ Prepare CSV with correct headers</li>
+                        <li>✓ Validate LibraryCodes beforehand</li>
+                        <li>✓ Use consistent formatting</li>
+                        <li>✓ Test with a small batch first</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
