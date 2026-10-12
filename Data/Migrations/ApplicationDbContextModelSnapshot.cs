@@ -423,6 +423,9 @@ namespace LibrarySystem.Data.Migrations
                     b.Property<int>("BorrowerId")
                         .HasColumnType("int");
 
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
@@ -444,6 +447,8 @@ namespace LibrarySystem.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BorrowerId");
+
+                    b.HasIndex("BranchId");
 
                     b.HasIndex("ItemId", "Status", "QueuePosition");
 
@@ -925,6 +930,12 @@ namespace LibrarySystem.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LibrarySystem.Models.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("LibrarySystem.Models.Item", "Item")
                         .WithMany()
                         .HasForeignKey("ItemId")
@@ -932,6 +943,8 @@ namespace LibrarySystem.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Borrower");
+
+                    b.Navigation("Branch");
 
                     b.Navigation("Item");
                 });

@@ -1,0 +1,46 @@
+﻿@model LibrarySystem.ViewModels.KioskConfirmViewModel
+@{
+    ViewData["Title"] = "Confirm Checkout";
+}
+
+<div class="text-center mb-4">
+    <h2 style="font-weight: 600;">Confirm Checkout</h2>
+    <p class="text-muted">Please check the details below before confirming.</p>
+</div>
+
+<div class="card border-primary mx-auto mb-4" style="max-width: 560px;">
+    <div class="card-body p-4">
+        <dl class="row mb-0">
+            <dt class="col-4">Item</dt>
+            <dd class="col-8">@Model.ItemName</dd>
+
+            <dt class="col-4">Code</dt>
+            <dd class="col-8">@Model.ItemCode</dd>
+
+            <dt class="col-4">Type</dt>
+            <dd class="col-8">@Model.ItemType</dd>
+
+            <dt class="col-4">Due Date</dt>
+            <dd class="col-8">@Model.DueDate</dd>
+
+            @if (Model.IsReservation)
+            {
+                <dt class="col-4">Reservation</dt>
+                <dd class="col-8"><span class="badge bg-success">Collecting reserved item</span></dd>
+            }
+        </dl>
+    </div>
+</div>
+
+<div class="d-flex gap-3 mx-auto" style="max-width: 560px;">
+    <form asp-action="Confirm" method="post" class="flex-fill">
+        <input type="hidden" asp-for="LibraryCard" />
+        <input type="hidden" asp-for="ItemCode" />
+        <input type="hidden" asp-for="ItemName" />
+        <input type="hidden" asp-for="ItemType" />
+        <input type="hidden" asp-for="DueDate" />
+        <input type="hidden" asp-for="IsReservation" />
+        <button type="submit" class="btn btn-primary btn-touch w-100">Confirm</button>
+    </form>
+    <a asp-action="Checkout" asp-route-card="@Model.LibraryCard" class="btn btn-outline-secondary btn-touch flex-fill">Cancel</a>
+</div>

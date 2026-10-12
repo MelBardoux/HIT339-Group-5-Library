@@ -48,6 +48,7 @@
                             {
                                 <span class="badge bg-warning">@result.Status</span>
                             }
+                            <span class="badge bg-info">@result.BranchName</span>
                             <p class="mt-2"><small class="text-muted">@result.LibraryCode</small></p>
                         </div>
                         <div class="card-footer">
@@ -70,18 +71,21 @@ else
             <a class="nav-link @(Model.ActiveTab == "books" ? "active" : "")"
                asp-action="Index" asp-route-tab="books"
                asp-route-genreId="@Model.SelectedGenreId"
+               asp-route-branchId="@Model.SelectedBranchId"
                asp-route-sort="@Model.SelectedSort">Books</a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link @(Model.ActiveTab == "toys" ? "active" : "")"
                asp-action="Index" asp-route-tab="toys"
                asp-route-typeId="@Model.SelectedTypeId"
+               asp-route-branchId="@Model.SelectedBranchId"
                asp-route-sort="@Model.SelectedSort">Toys</a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link @(Model.ActiveTab == "music" ? "active" : "")"
                asp-action="Index" asp-route-tab="music"
                asp-route-formatId="@Model.SelectedFormatId"
+               asp-route-branchId="@Model.SelectedBranchId"
                asp-route-sort="@Model.SelectedSort">Music</a>
         </li>
     </ul>
@@ -90,7 +94,7 @@ else
     {
         <form method="get" asp-action="Index" class="row mb-3">
             <input type="hidden" name="tab" value="books" />
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select name="genreId" class="form-select" onchange="this.form.submit()">
                     <option value="">All Genres</option>
                     @foreach (var genre in Model.BookGenres)
@@ -99,7 +103,16 @@ else
                     }
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <select name="branchId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    @foreach (var branch in Model.Branches)
+                    {
+                        <option value="@branch.Id" selected="@(Model.SelectedBranchId == branch.Id)">@branch.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
                 <select name="sort" class="form-select" onchange="this.form.submit()">
                     <option value="name" selected="@(Model.SelectedSort == "name")">Sort by Name</option>
                     <option value="author" selected="@(Model.SelectedSort == "author")">Sort by Author</option>
@@ -108,7 +121,6 @@ else
             </div>
         </form>
 
-        <!-- Desktop table -->
         <div class="d-none d-md-block">
             <div class="table-responsive">
                 <table class="table">
@@ -119,6 +131,7 @@ else
                             <th>Author</th>
                             <th>Year</th>
                             <th>Genres</th>
+                            <th>Branch</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -132,6 +145,7 @@ else
                                 <td>@book.AuthorName</td>
                                 <td>@book.PublicationYear</td>
                                 <td>@string.Join(", ", book.Genres)</td>
+                                <td>@book.BranchName</td>
                                 <td>
                                     @if (book.Status == "Available")
                                     {
@@ -150,7 +164,6 @@ else
             </div>
         </div>
 
-        <!-- Mobile cards -->
         <div class="d-md-none">
             @foreach (var book in Model.Books)
             {
@@ -160,6 +173,7 @@ else
                         <p class="card-text mb-1"><small class="text-muted">@book.LibraryCode</small></p>
                         <p class="card-text mb-1">@book.AuthorName · @book.PublicationYear</p>
                         <p class="card-text mb-1"><small>@string.Join(", ", book.Genres)</small></p>
+                        <span class="badge bg-info">@book.BranchName</span>
                         @if (book.Status == "Available")
                         {
                             <span class="badge bg-success">@book.Status</span>
@@ -179,7 +193,7 @@ else
     {
         <form method="get" asp-action="Index" class="row mb-3">
             <input type="hidden" name="tab" value="toys" />
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select name="typeId" class="form-select" onchange="this.form.submit()">
                     <option value="">All Types</option>
                     @foreach (var type in Model.ToyTypes)
@@ -188,7 +202,16 @@ else
                     }
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <select name="branchId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    @foreach (var branch in Model.Branches)
+                    {
+                        <option value="@branch.Id" selected="@(Model.SelectedBranchId == branch.Id)">@branch.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
                 <select name="sort" class="form-select" onchange="this.form.submit()">
                     <option value="name" selected="@(Model.SelectedSort == "name")">Sort by Name</option>
                     <option value="age" selected="@(Model.SelectedSort == "age")">Sort by Age</option>
@@ -196,7 +219,6 @@ else
             </div>
         </form>
 
-        <!-- Desktop table -->
         <div class="d-none d-md-block">
             <div class="table-responsive">
                 <table class="table">
@@ -207,6 +229,7 @@ else
                             <th>Age</th>
                             <th>Battery</th>
                             <th>Types</th>
+                            <th>Branch</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -220,6 +243,7 @@ else
                                 <td>@toy.AgeDisplay</td>
                                 <td>@(toy.BatteryRequired ? "Yes" : "No")</td>
                                 <td>@string.Join(", ", toy.Types)</td>
+                                <td>@toy.BranchName</td>
                                 <td>
                                     @if (toy.Status == "Available")
                                     {
@@ -238,7 +262,6 @@ else
             </div>
         </div>
 
-        <!-- Mobile cards -->
         <div class="d-md-none">
             @foreach (var toy in Model.Toys)
             {
@@ -248,6 +271,7 @@ else
                         <p class="card-text mb-1"><small class="text-muted">@toy.LibraryCode</small></p>
                         <p class="card-text mb-1">Ages @toy.AgeDisplay · Battery: @(toy.BatteryRequired ? "Yes" : "No")</p>
                         <p class="card-text mb-1"><small>@string.Join(", ", toy.Types)</small></p>
+                        <span class="badge bg-info">@toy.BranchName</span>
                         @if (toy.Status == "Available")
                         {
                             <span class="badge bg-success">@toy.Status</span>
@@ -267,7 +291,7 @@ else
     {
         <form method="get" asp-action="Index" class="row mb-3">
             <input type="hidden" name="tab" value="music" />
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select name="formatId" class="form-select" onchange="this.form.submit()">
                     <option value="">All Formats</option>
                     @foreach (var format in Model.MusicFormats)
@@ -276,7 +300,16 @@ else
                     }
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <select name="branchId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    @foreach (var branch in Model.Branches)
+                    {
+                        <option value="@branch.Id" selected="@(Model.SelectedBranchId == branch.Id)">@branch.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
                 <select name="sort" class="form-select" onchange="this.form.submit()">
                     <option value="name" selected="@(Model.SelectedSort == "name")">Sort by Name</option>
                     <option value="artist" selected="@(Model.SelectedSort == "artist")">Sort by Artist</option>
@@ -286,7 +319,6 @@ else
             </div>
         </form>
 
-        <!-- Desktop table -->
         <div class="d-none d-md-block">
             <div class="table-responsive">
                 <table class="table">
@@ -298,6 +330,7 @@ else
                             <th>Artists</th>
                             <th>Year</th>
                             <th>Genres</th>
+                            <th>Branch</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -312,6 +345,7 @@ else
                                 <td>@music.Artists</td>
                                 <td>@music.ReleaseYear</td>
                                 <td>@string.Join(", ", music.Genres)</td>
+                                <td>@music.BranchName</td>
                                 <td>
                                     @if (music.Status == "Available")
                                     {
@@ -330,7 +364,6 @@ else
             </div>
         </div>
 
-        <!-- Mobile cards -->
         <div class="d-md-none">
             @foreach (var music in Model.Music)
             {
@@ -341,6 +374,7 @@ else
                         <p class="card-text mb-1">@music.Artists · @music.AlbumTitle</p>
                         <p class="card-text mb-1"><small>@music.ReleaseYear · @string.Join(", ", music.Genres)</small></p>
                         <p class="card-text mb-1"><small>@string.Join(", ", music.Formats)</small></p>
+                        <span class="badge bg-info">@music.BranchName</span>
                         @if (music.Status == "Available")
                         {
                             <span class="badge bg-success">@music.Status</span>

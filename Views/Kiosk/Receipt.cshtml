@@ -1,0 +1,38 @@
+﻿@using System.Linq
+@model LibrarySystem.ViewModels.KioskCheckoutViewModel
+@{
+    ViewData["Title"] = "Receipt";
+}
+<partial name="_BorrowerBanner" model="Model.Borrower" />
+
+<div class="text-center mb-4">
+    <h2 style="font-weight: 600;">Checkout Summary</h2>
+    <p class="text-muted">Here's what you borrowed today.</p>
+</div>
+
+@if (Model.CheckedOutToday.Any())
+{
+    <div class="card mb-4 mx-auto" style="max-width: 560px;">
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                @foreach (var loan in Model.CheckedOutToday)
+                {
+                    <li class="list-group-item d-flex justify-content-between flex-wrap">
+                        <span><strong>@loan.ItemName</strong> <small class="text-muted">@loan.LibraryCode</small></span>
+                        <span>Due @loan.DueDate.ToString("dd/MM/yyyy")</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <p class="text-center text-muted">@Model.CheckedOutToday.Count item(s) checked out today.</p>
+}
+else
+{
+    <p class="text-center text-muted">No items were checked out today.</p>
+}
+
+<div class="mx-auto" style="max-width: 560px;">
+        <a asp-action="Menu" asp-route-card="@Model.Borrower.LibraryCard" class="btn btn-primary btn-touch w-100">Back to menu</a>
+</div>

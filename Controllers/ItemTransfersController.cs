@@ -1,5 +1,6 @@
 ﻿using LibrarySystem.Data;
 using LibrarySystem.Models;
+using LibrarySystem.Services;
 using LibrarySystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,13 +15,16 @@ namespace LibrarySystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly INotificationService _notifications;
 
         public ItemTransfersController(
-            ApplicationDbContext context,
-            UserManager<IdentityUser> userManager)
+    ApplicationDbContext context,
+    UserManager<IdentityUser> userManager,
+    INotificationService notifications)
         {
             _context = context;
             _userManager = userManager;
+            _notifications = notifications;
         }
 
         // GET: ItemTransfers
@@ -249,8 +253,8 @@ namespace LibrarySystem.Controllers
                 return Forbid();
 
             var transfer = await _context.ItemTransfers
-                .Include(t => t.Item)
-                .FirstOrDefaultAsync(t => t.Id == id);
+    .Include(t => t.Item).ThenInclude(i => i.Branch)
+    .FirstOrDefaultAsync(t => t.Id == id);
 
             if (transfer == null)
                 return NotFound();
@@ -379,9 +383,32 @@ namespace LibrarySystem.Controllers
             }
 
             transfer.Item.BranchId = transfer.ToBranchId;
+            transfer.Item.Branch = await _context.Branches.FirstAsync(b => b.Id == transfer.ToBranchId);
             transfer.Item.Status = ItemStatus.Available;
             transfer.Status = TransferStatus.Completed;
             transfer.CompletedDate = DateTime.Now;
+
+            // Check if there's a waiting reservation for this item at this branch
+var pendingReservation = await _context.Reservations
+    .Include(r => r.Borrower)
+    .Include(r => r.Item).ThenInclude(i => i.Branch)
+    .Where(r => r.ItemId == transfer.ItemId
+             && r.BranchId == transfer.ToBranchId
+             && r.Status == ReservationStatus.Waiting)
+    .OrderBy(r => r.QueuePosition)
+    .FirstOrDefaultAsync();
+
+if (pendingReservation != null)
+{
+    // Item has arrived at the borrower's branch, notify them
+    pendingReservation.Status = ReservationStatus.Ready;
+    pendingReservation.NotifiedAt = DateTime.Now;
+    pendingReservation.ExpiresAt = DateTime.Now.AddHours(48);
+    transfer.Item.Status = ItemStatus.Reserved;
+    transfer.Item.ReservedForBorrowerId = pendingReservation.BorrowerId;
+
+                _notifications.NotifyItemAvailable(pendingReservation.Borrower, transfer.Item);
+            }
 
             await _context.SaveChangesAsync();
 

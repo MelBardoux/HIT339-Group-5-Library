@@ -38,5 +38,6 @@ namespace LibrarySystem.ViewModels
         public string Type { get; set; }
         public string Status { get; set; }
         public bool IsAvailable { get; set; }
+        public string BranchName { get; set; } = string.Empty;
     }
 }

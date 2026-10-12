@@ -5,25 +5,46 @@
 <partial name="_BorrowerBanner" model="Model" />
 
 <div class="row text-center">
-    <div class="col-md-6 mb-3">
+    <div class="col-6 col-md-3 mb-3">
         <div class="card h-100 border-primary home-card">
             <div class="card-body py-5">
                 <div class="display-4 mb-2">📖</div>
                 <h5 class="card-title text-primary" style="font-weight: 600;">Borrow items</h5>
                 <p class="text-muted">Scan the barcode on each item to check it out.</p>
                 <a asp-action="Checkout" asp-route-card="@Model.LibraryCard"
-                   class="btn btn-outline-primary btn-touch px-5 @(Model.CanBorrow ? "" : "disabled")">Start borrowing</a>
+                   class="btn btn-outline-primary btn-touch px-4 @(Model.CanBorrow ? "" : "disabled")">Start</a>
             </div>
         </div>
     </div>
-    <div class="col-md-6 mb-3">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card h-100 border-primary home-card">
+            <div class="card-body py-5">
+                <div class="display-4 mb-2">↩️</div>
+                <h5 class="card-title text-primary" style="font-weight: 600;">Return items</h5>
+                <p class="text-muted">Scan the barcode on each item to return it.</p>
+                <a asp-action="Return" asp-route-card="@Model.LibraryCard"
+                   class="btn btn-outline-primary btn-touch px-4">Start</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
         <div class="card h-100 border-primary home-card">
             <div class="card-body py-5">
                 <div class="display-4 mb-2">👤</div>
                 <h5 class="card-title text-primary" style="font-weight: 600;">My account</h5>
-                <p class="text-muted">See your loans, due dates, fines and reservations.</p>
+                <p class="text-muted">Loans, due dates, fines and reservations.</p>
                 <a asp-action="Account" asp-route-card="@Model.LibraryCard"
-                   class="btn btn-outline-primary btn-touch px-5">View account</a>
+                   class="btn btn-outline-primary btn-touch px-4">View</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card h-100 border-danger home-card">
+            <div class="card-body py-5">
+                <div class="display-4 mb-2">🚪</div>
+                <h5 class="card-title text-danger" style="font-weight: 600;">Log out</h5>
+                <p class="text-muted">Finished? Log out to protect your account.</p>
+                <a asp-action="Index" class="btn btn-outline-danger btn-touch px-4">Log out</a>
             </div>
         </div>
     </div>

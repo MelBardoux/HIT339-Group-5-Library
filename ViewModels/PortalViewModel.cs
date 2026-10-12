@@ -12,11 +12,13 @@ namespace LibrarySystem.ViewModels
         public int? SelectedGenreId { get; set; }
         public int? SelectedTypeId { get; set; }
         public int? SelectedFormatId { get; set; }
+        public int? SelectedBranchId { get; set; }
         public string SelectedSort { get; set; } = "name";
 
         public List<BookGenre> BookGenres { get; set; } = new();
         public List<ToyType> ToyTypes { get; set; } = new();
         public List<MusicFormat> MusicFormats { get; set; } = new();
+        public List<Branch> Branches { get; set; } = new();
 
         public List<PortalBookViewModel> Books { get; set; } = new();
         public List<PortalToyViewModel> Toys { get; set; } = new();
@@ -31,6 +33,7 @@ namespace LibrarySystem.ViewModels
         public string Type { get; set; }
         public string Status { get; set; }
         public string Summary { get; set; }
+        public string BranchName { get; set; } = string.Empty;
     }
 
     public class PortalBookViewModel
@@ -41,6 +44,7 @@ namespace LibrarySystem.ViewModels
         public string AuthorName { get; set; }
         public string? PublicationYear { get; set; }
         public string Status { get; set; }
+        public string BranchName { get; set; } = string.Empty;
         public List<string> Genres { get; set; } = new();
     }
 
@@ -52,6 +56,7 @@ namespace LibrarySystem.ViewModels
         public string AgeDisplay { get; set; }
         public bool BatteryRequired { get; set; }
         public string Status { get; set; }
+        public string BranchName { get; set; } = string.Empty;
         public List<string> Types { get; set; } = new();
     }
 
@@ -64,8 +69,8 @@ namespace LibrarySystem.ViewModels
         public string Artists { get; set; }
         public string? ReleaseYear { get; set; }
         public string Status { get; set; }
+        public string BranchName { get; set; } = string.Empty;
         public List<string> Formats { get; set; } = new();
         public List<string> Genres { get; set; } = new();
     }
-
 }
