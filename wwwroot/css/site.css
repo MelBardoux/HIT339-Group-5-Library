@@ -29,3 +29,85 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.dashboard-tile {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+    .dashboard-tile:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .dashboard-tile .card {
+        background: #fff;
+        border: 1px solid #e0e2e6;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border-left: 5px solid transparent;
+        transition: transform 0.15s, box-shadow 0.15s;
+        height: 100%;
+        min-height: 160px;
+        display: flex;
+        align-items: center;
+    }
+
+    .dashboard-tile:hover .card {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .dashboard-tile .card-body {
+        padding: 1.75rem 1.5rem;
+        width: 100%;
+    }
+
+    .dashboard-tile .tile-title {
+        font-weight: 600;
+        font-size: 1.15rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .dashboard-tile .tile-desc {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+.tile-accent-blue .card {
+    border-left-color: #4a90d9;
+}
+
+.tile-accent-green .card {
+    border-left-color: #28a745;
+}
+
+.tile-accent-orange .card {
+    border-left-color: #fd7e14;
+}
+
+.tile-accent-purple .card {
+    border-left-color: #6f42c1;
+}
+
+.tile-accent-teal .card {
+    border-left-color: #20c997;
+}
+
+.tile-accent-red .card {
+    border-left-color: #dc3545;
+}
+
+.section-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #d6d8db;
+}

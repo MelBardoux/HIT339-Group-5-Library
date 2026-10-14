@@ -1,0 +1,77 @@
+﻿@using LibrarySystem.Data
+@using LibrarySystem.Models
+@inject ApplicationDbContext DbContext
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center mb-4 mt-3">
+    <h2 style="font-weight: 600;">Welcome to the Library</h2>
+    <p class="text-muted">A library management system for books, toys, and music</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-sm-6">
+        <a asp-controller="Portal" asp-action="Index" class="dashboard-tile tile-accent-blue">
+            <div class="card">
+                <div class="card-body">
+                    <div class="tile-title">Library Portal</div>
+                    <p class="tile-desc">Search and browse the full catalogue</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a asp-controller="Kiosk" asp-action="Index" class="dashboard-tile tile-accent-green">
+            <div class="card">
+                <div class="card-body">
+                    <div class="tile-title">Self-Service Kiosk</div>
+                    <p class="tile-desc">Borrow items and check your account</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-sm-4">
+        <a asp-controller="Portal" asp-action="Random" asp-route-type="book" class="dashboard-tile tile-accent-purple">
+            <div class="card">
+                <div class="card-body d-flex flex-column">
+                    <div class="tile-title">Books</div>
+                    <p class="tile-desc">
+                        @DbContext.Books.Count(b => b.Status != ItemStatus.Destroyed && b.Status != ItemStatus.Lost) in catalogue
+                    </p>
+                    <span class="btn btn-sm mt-auto mx-auto" style="border: 1px solid #6f42c1; color: #212529; border-radius: 20px; width: 100%; max-width: 200px; height: 50px; display: flex; align-items: center; justify-content: center;">Discover a book</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-4">
+        <a asp-controller="Portal" asp-action="Random" asp-route-type="toy" class="dashboard-tile tile-accent-teal">
+            <div class="card">
+                <div class="card-body d-flex flex-column">
+                    <div class="tile-title">Toys</div>
+                    <p class="tile-desc">
+                        @DbContext.Toys.Count(t => t.Status != ItemStatus.Destroyed && t.Status != ItemStatus.Lost) in catalogue
+                    </p>
+                    <span class="btn btn-sm mt-auto mx-auto" style="border: 1px solid #20c997; color: #212529; border-radius: 20px; width: 100%; max-width: 200px; height: 50px; display: flex; align-items: center; justify-content: center;">Find a toy</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-4">
+        <a asp-controller="Portal" asp-action="Random" asp-route-type="music" class="dashboard-tile tile-accent-orange">
+            <div class="card">
+                <div class="card-body d-flex flex-column">
+                    <div class="tile-title">Music</div>
+                    <p class="tile-desc">
+                        @DbContext.Music.Count(m => m.Status != ItemStatus.Destroyed && m.Status != ItemStatus.Lost) in catalogue
+                    </p>
+                    <span class="btn btn-sm mt-auto mx-auto" style="border: 1px solid #fd7e14; color: #212529; border-radius: 20px; width: 100%; max-width: 200px; height: 50px; display: flex; align-items: center; justify-content: center;">Listen to something new</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
