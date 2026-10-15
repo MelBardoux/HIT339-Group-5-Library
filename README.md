@@ -6,7 +6,7 @@
 
 | Name | Student ID | Email |
 |---|---|---|
-| Student 1 | Melanie Bardous | s329560@students.cdu.edu.au |
+| Student 1 | Melanie Bardoux | s329560@students.cdu.edu.au |
 | Student 2 | Carlos Cordoba  | s352147@students.cdu.edu.au |
 | Student 3 | Ahnad Siam      | s374721@students.cdu.edu.au |
 | Student 4 | Spencer Siu     | s344930@students.cdu.edu.au |

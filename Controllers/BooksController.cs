@@ -1,5 +1,6 @@
 ﻿using LibrarySystem.Data;
 using LibrarySystem.Models;
+using LibrarySystem.Services;
 using LibrarySystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace LibrarySystem.Controllers
     public class BooksController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notifications;
 
-        public BooksController(ApplicationDbContext context)
+        public BooksController(ApplicationDbContext context, INotificationService notifications)
         {
             _context = context;
+            _notifications = notifications;
         }
 
         // GET: Books/Create
@@ -235,8 +238,32 @@ namespace LibrarySystem.Controllers
                     return NotFound();
                 }
 
+                var oldStatus = book.Status;
                 await viewModel.UpdateBook(_context, book);
                 await _context.SaveChangesAsync();
+
+                // If item status changed to Available, notify next person in reservation queue
+                if (book.Status == ItemStatus.Available && oldStatus != ItemStatus.Available)
+                {
+                    var nextReservation = await _context.Reservations
+                        .Include(r => r.Borrower)
+                        .Where(r => r.ItemId == book.Id && r.Status == ReservationStatus.Waiting)
+                        .OrderBy(r => r.QueuePosition)
+                        .FirstOrDefaultAsync();
+
+                    if (nextReservation != null)
+                    {
+                        nextReservation.Status = ReservationStatus.Ready;
+                        nextReservation.NotifiedAt = DateTime.Now;
+                        nextReservation.ExpiresAt = DateTime.Now.AddHours(48);
+                        book.Status = ItemStatus.Reserved;
+                        book.ReservedForBorrowerId = nextReservation.BorrowerId;
+                        book.Branch = await _context.Branches.FirstAsync(b => b.Id == book.BranchId);
+                        _notifications.NotifyItemAvailable(nextReservation.Borrower, book);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 

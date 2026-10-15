@@ -1,5 +1,6 @@
 ﻿using LibrarySystem.Data;
 using LibrarySystem.Models;
+using LibrarySystem.Services;
 using LibrarySystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace LibrarySystem.Controllers
     public class MusicController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notifications;
 
-        public MusicController(ApplicationDbContext context)
+        public MusicController(ApplicationDbContext context, INotificationService notifications)
         {
             _context = context;
+            _notifications = notifications;
         }
 
         // GET: Music/Index
@@ -196,8 +199,32 @@ namespace LibrarySystem.Controllers
                     return NotFound();
                 }
 
+                var oldStatus = music.Status;
                 await viewModel.UpdateMusic(_context, music);
                 await _context.SaveChangesAsync();
+
+                // If item status changed to Available, notify next person in reservation queue
+                if (music.Status == ItemStatus.Available && oldStatus != ItemStatus.Available)
+                {
+                    var nextReservation = await _context.Reservations
+                        .Include(r => r.Borrower)
+                        .Where(r => r.ItemId == music.Id && r.Status == ReservationStatus.Waiting)
+                        .OrderBy(r => r.QueuePosition)
+                        .FirstOrDefaultAsync();
+
+                    if (nextReservation != null)
+                    {
+                        nextReservation.Status = ReservationStatus.Ready;
+                        nextReservation.NotifiedAt = DateTime.Now;
+                        nextReservation.ExpiresAt = DateTime.Now.AddHours(48);
+                        music.Status = ItemStatus.Reserved;
+                        music.ReservedForBorrowerId = nextReservation.BorrowerId;
+                        music.Branch = await _context.Branches.FirstAsync(b => b.Id == music.BranchId);
+                        _notifications.NotifyItemAvailable(nextReservation.Borrower, music);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
