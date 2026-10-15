@@ -102,32 +102,31 @@ After starting the application, use the home page and navigation menu to access 
 
 - Borrowers and Loans (baseline from Assignment 2)
 
-- Multi-Branch Inventory and Inter-Branch Transfers (new module)
+- **Multi-Branch Inventory and Inter-Branch Transfers**
 
-  > **Navigation:** Reception/Manager Dashboard > Item Transfers (accessible by Reception and Manager)
-  >
-  > **Module Overview**
-  > Enables staff to coordinate inter-branch item transfers. Staff can request available items held by other branches, and the source branch can approve or reject requests. Approved items are marked as In Transit until received by the requesting branch. On receipt, if a waiting reservation exists at that branch, the item is automatically reserved and the borrower is notified.
-  >
-  > **Features**
-  > - **Request Transfer** - select from available items at other branches, only items that are Available and not On Order or already in an active transfer can be requested
-  > - **Approve/Reject** - source branch staff can approve (marks item as In Transit) or reject incoming requests
-  > - **Receive** - requesting branch confirms receipt, item's branch is updated, status returns to Available
-  > - **Reservation Integration** - on receipt, if a waiting reservation exists at the receiving branch, the item is automatically reserved and the borrower notified with 48-hour pickup window
-  > - **Transfer Dashboard** - three sections: Requests Made by This Branch, Incoming Transfer Requests, Transfer History (completed and rejected)
-  > - **Pending Request Highlight** - Reception dashboard tile highlights with a red-tinted background when there are pending incoming transfer requests
-  >
-  > **Integration Test**
-  > 1. Log in as Sydney Reception (`sydney.receptionists@email.com` / `Reception123!`)
-  > 2. Navigate to **Item Transfers** and click **New Transfer Request**
-  > 3. Select an available item from Darwin, e.g. **"A Brief History of Time"** (BKS-0002) - confirm the request is created
-  > 4. Log out. Log in as Darwin Reception (`darwin.receptionists@email.com` / `Reception123!`)
-  > 5. Verify the **Item Transfers** tile on the dashboard is highlighted
-  > 6. Navigate to **Item Transfers** - verify the request appears under **Incoming Transfer Requests** with **Approve** and **Reject** buttons
-  > 7. Click **Approve** - verify the status changes to "InTransit"
-  > 8. Log out. Log in as Sydney Reception again
-  > 9. Navigate to **Item Transfers** - verify the request appears under **Requests Made by This Branch** with a **Receive** button
-  > 10. Click **Receive** - verify the transfer is completed and the item is now available in Sydney inventory
+  **Access:** Reception and Manager accounts assigned to a branch.
+
+  **Navigation:** Branch Inventory and Item Transfers are available through the staff navigation menu.
+
+  **Module Overview**
+
+  Extends the library system to support Darwin, Sydney, and Brisbane branches. Staff can view item locations, filter inventory by branch, and coordinate transfers between branches. Each staff account is associated with a branch, allowing transfer requests and available actions to be restricted according to the staff member's branch.
+
+  **Features**
+  - **Branch Inventory** — view catalogue items, their current branch, and status, with the option to filter inventory by branch.
+  - **Transfer Requests** — request an available item held at another branch, provided it is not on order or already involved in an active transfer.
+  - **Approve or Reject** — staff at the source branch can approve or reject incoming transfer requests.
+  - **Transfer and Receipt** — approved transfers are marked as In Transit. The destination branch confirms receipt, the item's branch is updated, and its status returns to Available.
+  - **Branch-Specific Access** — staff see relevant requests and can perform actions according to their branch's role in the transfer.
+
+  **Integration Test**
+  1. Log in using a Reception account assigned to Sydney.
+  2. Navigate to **Branch Inventory** and verify that inventory and branch filtering are available.
+  3. Open **Item Transfers**, select **New Transfer Request**, and request an available item currently held at another branch.
+  4. Log out and sign in using a Reception account assigned to the source branch.
+  5. Open **Item Transfers**, locate the incoming request, and approve it.
+  6. Log back in using the destination branch's Reception account and confirm receipt of the item.
+  7. Verify that the transfer is completed and the item is listed under the destination branch with Available status.
 
 - Digital Reservation and Waitlist Queue (new module)
 
@@ -240,25 +239,42 @@ After starting the application, use the home page and navigation menu to access 
   > 7. Navigate to **Return items**, scan item code **BKS-0002** - verify the success message "A Brief History of Time returned successfully" appears
   > 8. Click **Log out** - verify the kiosk returns to the welcome screen
 
-### 3.6 Public API (new module)
+### 3.6 Public REST API
 
-  > **Navigation:** `GET /api/catalogue/` (external API, no UI)
-  >
-  > **Module Overview**
-  > A read-only REST API that exposes catalogue information for external applications. All endpoints are secured with an API key passed via the `X-API-Key` HTTP header. The API returns only available items that are not on order, keeping internal data hidden from the public response.
-  >
-  > **Features**
-  > - **Items Endpoint** (`GET /api/catalogue/items`) - returns available catalogue items that are not on order; response includes library code, name, type (Book/Toy/Music), branch, and status
-  > - **Categories Endpoint** (`GET /api/catalogue/categories`) - returns book genres, toy types, and music genres
-  > - **Status Endpoint** (`GET /api/catalogue/status`) - returns the library's operating status and message from application configuration
-  > - **API Key Authentication** - all requests require an `X-API-Key` header; uses SHA256 hashing with fixed-time comparison; fails closed if no key is configured
-  >
-  > **Integration Test**
-  > 1. Configure the API key in User Secrets as `"ApiSettings:ApiKey": "LibraryApi2026"` (refer to Installation and Running Instructions manual)
-  > 2. Send `GET /api/catalogue/items` with header `X-API-Key: LibraryApi2026` - verify a JSON array of available items is returned with fields: LibraryCode, Name, Type, Branch, Status
-  > 3. Send `GET /api/catalogue/items` without the `X-API-Key` header - verify a 401 Unauthorized response
-  > 4. Send `GET /api/catalogue/categories` with header `X-API-Key: LibraryApi2026` - verify book genres, toy types, and music genres are returned
-  > 5. Send `GET /api/catalogue/status` with header `X-API-Key: LibraryApi2026` - verify the library operating status and message are returned
+**Access:** External applications and API clients. No website interface is required.
+
+**Module Overview**
+
+Provides a secure, read-only REST API that allows external applications to retrieve available catalogue items, catalogue categories, and library service status. The API uses the existing database and requires an API key supplied through the `X-API-Key` HTTP header.
+
+**Endpoints**
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/catalogue/items` | Returns items with Available status that are not on order. Each record includes the library code, name, type, branch, and status. |
+| `GET /api/catalogue/categories` | Returns book genres, toy types, and music genres. |
+| `GET /api/catalogue/status` | Returns the configured library service status and message. |
+
+**Security and Configuration**
+- **API-Key Authentication** — all endpoints require a valid `X-API-Key` header. Requests with missing or invalid keys receive `401 Unauthorized`.
+- **Secret Storage** — the development API key is stored using ASP.NET Core User Secrets and must not be hard-coded or committed to Git.
+- **Read-Only Access** — the API provides GET endpoints only and does not support creating, updating, or deleting catalogue data.
+- **Data Isolation** — responses expose only the intended catalogue information, not internal Identity, staff, or borrower records.
+- **Operating Status** — the status endpoint reads application configuration and does not represent real-time branch opening hours.
+
+**Integration Test**
+1. Configure a development API key from the project directory using User Secrets:
+
+   `dotnet user-secrets set "ApiSettings:ApiKey" "your-own-development-key"`
+
+   Replace the example value with your own key.
+
+2. Start the application and note its HTTPS address.
+3. Send a GET request to `/api/catalogue/items` with the header `X-API-Key` set to the configured key. Verify that a JSON array of available catalogue items is returned.
+4. Send a request to `/api/catalogue/items` without the key. Verify that the response is `401 Unauthorized`.
+5. Send a GET request to `/api/catalogue/categories` with the correct key. Verify that the three category groups are returned.
+6. Send a GET request to `/api/catalogue/status` with the correct key. Verify that the configured status and message are returned.
+7. Send a POST request to `/api/catalogue/items`. Verify that the request is rejected with `405 Method Not Allowed`.
 
 ## 4. Multi-Branch Data and Seeding
 
