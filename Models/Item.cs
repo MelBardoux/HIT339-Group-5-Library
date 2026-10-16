@@ -19,16 +19,16 @@ namespace LibrarySystem.Models
         [StringLength(100)]
         [RegularExpression(@"^[a-zA-ZÀ-ÿ\s.\-']+$",
             ErrorMessage = "Name may only contain letters, spaces, and . - '")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [StringLength(500)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         [RegularExpression(@"^[A-Z]{3}-[0-9]{4}$",
             ErrorMessage = "Library code must be three uppercase letters, a hyphen, then four digits (e.g. TOY-0042).")]
-        public string LibraryCode { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
 
         public ItemStatus Status { get; set; }
 

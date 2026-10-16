@@ -11,11 +11,11 @@ namespace LibrarySystem.ViewModels
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [StringLength(500)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Range(0, 18)]
         public int MinimumAge { get; set; }
@@ -83,7 +83,7 @@ namespace LibrarySystem.ViewModels
     public class TypeCheckboxViewModel
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public bool IsSelected { get; set; }
     }
 }

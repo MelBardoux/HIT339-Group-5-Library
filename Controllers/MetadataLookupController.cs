@@ -274,26 +274,26 @@ namespace LibrarySystem.Controllers
 
     public class MetadataSearchRequest
     {
-        public string Query { get; set; }
+        public string Query { get; set; } = string.Empty;
     }
 
     public class BookLookupRequest
     {
-        public string Author { get; set; }
-        public string Title { get; set; }
-        public string ISBN { get; set; }
+        public string Author { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string ISBN { get; set; } = string.Empty;
     }
 
     public class MusicLookupRequest
     {
-        public string Artist { get; set; }
-        public string Album { get; set; }
-        public string ISRC { get; set; }
+        public string Artist { get; set; } = string.Empty;
+        public string Album { get; set; } = string.Empty;
+        public string ISRC { get; set; } = string.Empty;
     }
 
     public class BatchEnrichmentRequest
     {
-        public string ItemType { get; set; }
-        public List<CsvItemEnrichmentRequest> Items { get; set; }
+        public string ItemType { get; set; } = string.Empty;
+        public List<CsvItemEnrichmentRequest> Items { get; set; } = new();
     }
 }

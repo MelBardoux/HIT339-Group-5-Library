@@ -3,8 +3,8 @@
     public class ToyDeleteViewModel
     {
         public int Id { get; set; }
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string AgeDisplay { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string AgeDisplay { get; set; } = string.Empty;
     }
 }

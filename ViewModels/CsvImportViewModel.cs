@@ -7,7 +7,7 @@ namespace LibrarySystem.ViewModels
     public class CsvImportViewModel
     {
         [Required(ErrorMessage = "Please select a file to upload")]
-        public IFormFile File { get; set; }
+        public IFormFile File { get; set; } = null!;
 
         [Required(ErrorMessage = "Please select an item type")]
         public string ItemType { get; set; } = "Book";
@@ -21,7 +21,7 @@ namespace LibrarySystem.ViewModels
         // For preview and results
         public List<CsvItemPreview> PreviewItems { get; set; } = new();
         public List<string> Errors { get; set; } = new();
-        public string CsvContent { get; set; }
+        public string CsvContent { get; set; } = string.Empty;
         public int TotalRows { get; set; }
         public int ValidRows { get; set; }
         public bool Success { get; set; }

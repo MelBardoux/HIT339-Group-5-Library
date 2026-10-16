@@ -5,7 +5,7 @@ namespace LibrarySystem.ViewModels
     public class LoanBorrowViewModel
     {
         [Required]
-        public string LibraryCard { get; set; }
+        public string LibraryCard { get; set; } = string.Empty;
 
         public List<string> LibraryCodes { get; set; } = new();
 
@@ -22,10 +22,10 @@ namespace LibrarySystem.ViewModels
     public class BorrowerLookupResult
     {
         public int Id { get; set; }
-        public string LibraryCard { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Status { get; set; }
+        public string LibraryCard { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
         public bool IsSuspended { get; set; }
         public decimal OutstandingFines { get; set; }
     }
@@ -33,10 +33,10 @@ namespace LibrarySystem.ViewModels
     public class ItemLookupResult
     {
         public int Id { get; set; }
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public string Status { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
         public bool IsAvailable { get; set; }
         public string BranchName { get; set; } = string.Empty;
     }

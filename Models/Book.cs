@@ -9,8 +9,8 @@ namespace LibrarySystem.Models
         public int? PublicationYear { get; set; }
         public bool PublicationYearUnknown { get; set; }
         public int AuthorId { get; set; }
-        public Author Author { get; set; }
-        public ICollection<BookGenre> Genres { get; set; }
+        public Author Author { get; set; } = null!;
+        public ICollection<BookGenre> Genres { get; set; } = new List<BookGenre>();
         public bool OtherGenre { get; set; }
         public string? OtherGenreText { get; set; }
     }

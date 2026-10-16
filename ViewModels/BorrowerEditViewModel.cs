@@ -8,11 +8,11 @@ namespace LibrarySystem.ViewModels
     {
         public int Id { get; set; }
 
-        public string LibraryCard { get; set; }
+        public string LibraryCard { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Date)]
@@ -21,15 +21,15 @@ namespace LibrarySystem.ViewModels
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [Phone]
-        public string Phone { get; set; }
+        public string Phone { get; set; } = string.Empty;
 
         [Required]
         [StringLength(250)]
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
 
         public BorrowerStatus Status { get; set; }
     }

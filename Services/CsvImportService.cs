@@ -511,8 +511,8 @@ namespace LibrarySystem.Services
         public int RowNumber { get; set; }
         public bool IsValid { get; set; }
         public List<string> Errors { get; set; } = new();
-        public string ItemName { get; set; }
-        public string AuthorArtistName { get; set; }
-        public string LibraryCode { get; set; }
+        public string ItemName { get; set; } = string.Empty;
+        public string AuthorArtistName { get; set; } = string.Empty;
+        public string LibraryCode { get; set; } = string.Empty;
     }
 }

@@ -64,6 +64,8 @@ namespace LibrarySystem.Controllers
                     .Include(b => b.Genres)
                     .FirstOrDefaultAsync(b => b.Id == id);
 
+                if (book == null) return NotFound();
+
                 return View("BookDetails", new SearchBookDetailsViewModel
                 {
                     LibraryCode = book.LibraryCode,
@@ -82,6 +84,8 @@ namespace LibrarySystem.Controllers
                 var toy = await _context.Toys
                     .Include(t => t.Types)
                     .FirstOrDefaultAsync(t => t.Id == id);
+
+                if (toy == null) return NotFound();
 
                 return View("ToyDetails", new SearchToyDetailsViewModel
                 {
@@ -102,6 +106,8 @@ namespace LibrarySystem.Controllers
                     .Include(m => m.Genres)
                     .Include(m => m.Formats)
                     .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (musicItem == null) return NotFound();
 
                 return View("MusicDetails", new SearchMusicDetailsViewModel
                 {

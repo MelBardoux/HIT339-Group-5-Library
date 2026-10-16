@@ -9,10 +9,10 @@
 
         public List<BranchFilterViewModel> Branches { get; set; } = new();
 
-        public BorrowingStatsViewModel BorrowingStats { get; set; }
-        public ItemStatsViewModel ItemStats { get; set; }
-        public FineStatsViewModel FineStats { get; set; }
-        public ReservationStatsViewModel ReservationStats { get; set; }
+        public BorrowingStatsViewModel BorrowingStats { get; set; } = new();
+        public ItemStatsViewModel ItemStats { get; set; } = new();
+        public FineStatsViewModel FineStats { get; set; } = new();
+        public ReservationStatsViewModel ReservationStats { get; set; } = new();
     }
 
     public class BorrowingStatsViewModel
@@ -82,41 +82,41 @@
 
     public class MostBorrowedItemViewModel
     {
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
         public int BorrowCount { get; set; }
     }
 
     public class BusiestBorrowerViewModel
     {
-        public string LibraryCard { get; set; }
-        public string Name { get; set; }
+        public string LibraryCard { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public int LoanCount { get; set; }
     }
 
     public class MonthlyCountViewModel
     {
-        public string Month { get; set; }
+        public string Month { get; set; } = string.Empty;
         public int Count { get; set; }
     }
 
     public class StatusCountViewModel
     {
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public int Count { get; set; }
     }
 
     public class GenreCountViewModel
     {
-        public string Genre { get; set; }
+        public string Genre { get; set; } = string.Empty;
         public int Count { get; set; }
     }
 
     public class BorrowerFineViewModel
     {
-        public string LibraryCard { get; set; }
-        public string Name { get; set; }
+        public string LibraryCard { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public decimal TotalFines { get; set; }
     }
 

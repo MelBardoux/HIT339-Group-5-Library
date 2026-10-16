@@ -159,7 +159,7 @@ namespace LibrarySystem.Controllers
                 }
 
                 borrower.Name = viewModel.Name;
-                borrower.DateOfBirth = viewModel.DateOfBirth.Value;
+                borrower.DateOfBirth = viewModel.DateOfBirth!.Value; 
                 borrower.Email = viewModel.Email;
                 borrower.Phone = viewModel.Phone;
                 borrower.Address = viewModel.Address;

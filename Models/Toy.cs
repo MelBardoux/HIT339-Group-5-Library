@@ -10,6 +10,6 @@ namespace LibrarySystem.Models
 
         public string AgeDisplay => $"{MinimumAge}+";
 
-        public ICollection<ToyType> Types { get; set; }
+        public ICollection<ToyType> Types { get; set; } = new List<ToyType>();
     }
 }

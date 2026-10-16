@@ -3,8 +3,8 @@
     public class BookDeleteViewModel
     {
         public int Id { get; set; }
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string AuthorName { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
     }
 }

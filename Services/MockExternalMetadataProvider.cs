@@ -5,22 +5,22 @@ namespace LibrarySystem.Services
     /// </summary>
     public class ExternalBookMetadata
     {
-        public string ISBN { get; set; }
-        public string ISBN13 { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string AuthorName { get; set; }
-        public string Publisher { get; set; }
+        public string ISBN { get; set; } = string.Empty;
+        public string ISBN13 { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
+        public string Publisher { get; set; } = string.Empty;
         public int? PublicationYear { get; set; }
         public int? PageCount { get; set; }
-        public string Language { get; set; }
+        public string Language { get; set; } = string.Empty;
         public List<string> Categories { get; set; } = new();
         public decimal? AverageRating { get; set; }
         public int? RatingCount { get; set; }
-        public string CoverImageUrl { get; set; }
-        public string PreviewUrl { get; set; }
-        public string OpenLibraryId { get; set; }
-        public string ConfidenceScore { get; set; } // High, Medium, Low
+        public string CoverImageUrl { get; set; } = string.Empty;
+        public string PreviewUrl { get; set; } = string.Empty;
+        public string OpenLibraryId { get; set; } = string.Empty;
+        public string ConfidenceScore { get; set; } = string.Empty; // High, Medium, Low
     }
 
     /// <summary>
@@ -28,23 +28,23 @@ namespace LibrarySystem.Services
     /// </summary>
     public class ExternalMusicMetadata
     {
-        public string ISRC { get; set; }
-        public string UPC { get; set; }
-        public string AlbumTitle { get; set; }
-        public string ArtistName { get; set; }
-        public string Description { get; set; }
-        public string Publisher { get; set; }
+        public string ISRC { get; set; } = string.Empty;
+        public string UPC { get; set; } = string.Empty;
+        public string AlbumTitle { get; set; } = string.Empty;
+        public string ArtistName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Publisher { get; set; } = string.Empty;
         public int? ReleaseYear { get; set; }
         public int? TrackCount { get; set; }
-        public string RecordLabel { get; set; }
+        public string RecordLabel { get; set; } = string.Empty;
         public List<string> Genres { get; set; } = new();
         public List<string> Formats { get; set; } = new();
         public decimal? AverageRating { get; set; }
         public int? RatingCount { get; set; }
-        public string CoverImageUrl { get; set; }
-        public string PreviewAudioUrl { get; set; }
-        public string SpotifyId { get; set; }
-        public string ConfidenceScore { get; set; } // High, Medium, Low
+        public string CoverImageUrl { get; set; } = string.Empty;
+        public string PreviewAudioUrl { get; set; } = string.Empty;
+        public string SpotifyId { get; set; } = string.Empty;
+        public string ConfidenceScore { get; set; } = string.Empty; // High, Medium, Low
     }
 
     /// <summary>
@@ -52,13 +52,13 @@ namespace LibrarySystem.Services
     /// </summary>
     public class ExternalMetadataSearchResult
     {
-        public string Query { get; set; }
+        public string Query { get; set; } = string.Empty;
         public int ResultCount { get; set; }
         public List<ExternalBookMetadata> BookResults { get; set; } = new();
         public List<ExternalMusicMetadata> MusicResults { get; set; } = new();
         public TimeSpan QueryTime { get; set; }
         public bool IsSuccessful { get; set; }
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -66,10 +66,10 @@ namespace LibrarySystem.Services
     /// </summary>
     public interface IExternalMetadataProvider
     {
-        Task<ExternalBookMetadata> GetBookMetadataByIsbnAsync(string isbn);
-        Task<ExternalBookMetadata> GetBookMetadataByAuthorAndTitleAsync(string author, string title);
-        Task<ExternalMusicMetadata> GetMusicMetadataByIsrcAsync(string isrc);
-        Task<ExternalMusicMetadata> GetMusicMetadataByArtistAndAlbumAsync(string artist, string album);
+        Task<ExternalBookMetadata?> GetBookMetadataByIsbnAsync(string isbn);
+        Task<ExternalBookMetadata?> GetBookMetadataByAuthorAndTitleAsync(string author, string title);
+        Task<ExternalMusicMetadata?> GetMusicMetadataByIsrcAsync(string isrc);
+        Task<ExternalMusicMetadata?> GetMusicMetadataByArtistAndAlbumAsync(string artist, string album);
         Task<ExternalMetadataSearchResult> SearchBooksAsync(string query);
         Task<ExternalMetadataSearchResult> SearchMusicAsync(string query);
     }
@@ -90,7 +90,7 @@ namespace LibrarySystem.Services
             _logger = logger;
         }
 
-        public async Task<ExternalBookMetadata> GetBookMetadataByIsbnAsync(string isbn)
+        public async Task<ExternalBookMetadata?> GetBookMetadataByIsbnAsync(string isbn)
         {
             if (string.IsNullOrWhiteSpace(isbn))
                 return null;
@@ -100,7 +100,7 @@ namespace LibrarySystem.Services
             return GetMockBookByIsbn(isbn);
         }
 
-        public async Task<ExternalBookMetadata> GetBookMetadataByAuthorAndTitleAsync(string author, string title)
+        public async Task<ExternalBookMetadata?> GetBookMetadataByAuthorAndTitleAsync(string author, string title)
         {
             if (string.IsNullOrWhiteSpace(author) || string.IsNullOrWhiteSpace(title))
                 return null;
@@ -110,7 +110,7 @@ namespace LibrarySystem.Services
             return GetMockBookByAuthorAndTitle(author, title);
         }
 
-        public async Task<ExternalMusicMetadata> GetMusicMetadataByIsrcAsync(string isrc)
+        public async Task<ExternalMusicMetadata?> GetMusicMetadataByIsrcAsync(string isrc)
         {
             if (string.IsNullOrWhiteSpace(isrc))
                 return null;
@@ -120,7 +120,7 @@ namespace LibrarySystem.Services
             return GetMockMusicByIsrc(isrc);
         }
 
-        public async Task<ExternalMusicMetadata> GetMusicMetadataByArtistAndAlbumAsync(string artist, string album)
+        public async Task<ExternalMusicMetadata?> GetMusicMetadataByArtistAndAlbumAsync(string artist, string album)
         {
             if (string.IsNullOrWhiteSpace(artist) || string.IsNullOrWhiteSpace(album))
                 return null;

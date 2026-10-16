@@ -10,19 +10,19 @@ namespace LibrarySystem.ViewModels
     {
         public int Id { get; set; }
 
-        public string LibraryCode { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [StringLength(500)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string AlbumTitle { get; set; }
+        public string AlbumTitle { get; set; } = string.Empty;
 
         [YearRange(1450, nameof(ReleaseYearUnknown))]
         public int? ReleaseYear { get; set; }

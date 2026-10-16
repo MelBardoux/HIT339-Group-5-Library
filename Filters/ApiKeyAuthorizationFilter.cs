@@ -42,7 +42,7 @@ namespace LibrarySystem.Filters
                 Encoding.UTF8.GetBytes(configuredKey));
 
             var providedHash = SHA256.HashData(
-                Encoding.UTF8.GetBytes(providedKey));
+                Encoding.UTF8.GetBytes(providedKey ?? string.Empty));
 
             if (!CryptographicOperations.FixedTimeEquals(
                     providedHash,

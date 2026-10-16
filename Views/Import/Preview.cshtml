@@ -49,7 +49,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="badge @(Model.Errors.Any() ? "bg-danger" : "bg-success") p-2 w-100 text-center mb-2">
+<div class="badge @((Model.Errors?.Any() ?? false) ? "bg-danger" : "bg-success") p-2 w-100 text-center mb-2">
                                 <div class="small text-white">Invalid Rows</div>
                                 <div class="fs-5 text-white">@(Model.TotalRows - Model.ValidRows)</div>
                             </div>
@@ -118,7 +118,7 @@
                 </div>
             }
 
-            @if (!Model.Errors.Any() && Model.ValidRows > 0)
+            @if (!(Model.Errors?.Any() ?? false) && Model.ValidRows > 0)
             {
                 <form asp-action="Process" method="post" id="importForm">
                     <input type="hidden" asp-for="CsvContent">

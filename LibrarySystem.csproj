@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	  <UseAppHost>false</UseAppHost> 
     <UserSecretsId>aspnet-LibrarySystem-f1557b24-768c-4aaa-8acd-3772934cbec1</UserSecretsId>
+	<NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

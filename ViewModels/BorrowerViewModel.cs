@@ -11,7 +11,7 @@ namespace LibrarySystem.ViewModels
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Date)]
@@ -20,15 +20,15 @@ namespace LibrarySystem.ViewModels
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [Phone]
-        public string Phone { get; set; }
+        public string Phone { get; set; } = string.Empty;
 
         [Required]
         [StringLength(250)]
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
 
         public async Task<Borrower> ToBorrower(ApplicationDbContext context)
         {
@@ -37,7 +37,7 @@ namespace LibrarySystem.ViewModels
             return new Borrower
             {
                 Name = Name,
-                DateOfBirth = DateOfBirth.Value,
+                DateOfBirth = DateOfBirth!.Value,
                 Email = Email,
                 Phone = Phone,
                 Address = Address,

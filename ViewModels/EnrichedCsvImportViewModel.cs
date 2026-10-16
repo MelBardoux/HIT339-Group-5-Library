@@ -32,24 +32,24 @@ namespace LibrarySystem.ViewModels
         public List<string> Errors { get; set; } = new();
 
         // Original CSV data
-        public string OriginalItemName { get; set; }
-        public string OriginalAuthorOrArtist { get; set; }
-        public string OriginalDescription { get; set; }
+        public string OriginalItemName { get; set; } = string.Empty;
+        public string OriginalAuthorOrArtist { get; set; } = string.Empty;
+        public string OriginalDescription { get; set; } = string.Empty;
         public int? OriginalYear { get; set; }
 
         // Enriched data
         public bool IsEnriched { get; set; }
-        public string EnrichmentSource { get; set; }
-        public string EnrichedItemName { get; set; }
-        public string EnrichedAuthorOrArtist { get; set; }
-        public string EnrichedDescription { get; set; }
+        public string EnrichmentSource { get; set; } = string.Empty;
+        public string EnrichedItemName { get; set; } = string.Empty;
+        public string EnrichedAuthorOrArtist { get; set; } = string.Empty;
+        public string EnrichedDescription { get; set; } = string.Empty;
         public int? EnrichedYear { get; set; }
         public List<string> EnrichedCategories { get; set; } = new();
-        public string EnrichedLibraryCode { get; set; }
+        public string EnrichedLibraryCode { get; set; } = string.Empty;
         public decimal? EnrichedRating { get; set; }
-        public string EnrichedCoverImageUrl { get; set; }
-        public string ConfidenceScore { get; set; }
-        public string EnrichmentErrorMessage { get; set; }
+        public string EnrichedCoverImageUrl { get; set; } = string.Empty;
+        public string ConfidenceScore { get; set; } = string.Empty;
+        public string EnrichmentErrorMessage { get; set; } = string.Empty;
 
         // Show changes
         public bool HasNameChange => OriginalItemName != EnrichedItemName;
@@ -75,24 +75,24 @@ namespace LibrarySystem.ViewModels
 
     public class MetadataComparisonViewModel
     {
-        public string ItemType { get; set; }
+        public string ItemType { get; set; } = string.Empty;
         public int RowNumber { get; set; }
 
         // Original CSV data
-        public string OriginalTitle { get; set; }
-        public string OriginalAuthor { get; set; }
-        public string OriginalDescription { get; set; }
+        public string OriginalTitle { get; set; } = string.Empty;
+        public string OriginalAuthor { get; set; } = string.Empty;
+        public string OriginalDescription { get; set; } = string.Empty;
 
         // External metadata
-        public string ExternalTitle { get; set; }
-        public string ExternalAuthor { get; set; }
-        public string ExternalDescription { get; set; }
+        public string ExternalTitle { get; set; } = string.Empty;
+        public string ExternalAuthor { get; set; } = string.Empty;
+        public string ExternalDescription { get; set; } = string.Empty;
         public List<string> ExternalCategories { get; set; } = new();
         public decimal? ExternalRating { get; set; }
-        public string ExternalCoverUrl { get; set; }
+        public string ExternalCoverUrl { get; set; } = string.Empty;
         public int? ExternalYear { get; set; }
-        public string ConfidenceScore { get; set; }
-        public string Source { get; set; }
+        public string ConfidenceScore { get; set; } = string.Empty;
+        public string Source { get; set; } = string.Empty;
     }
 
     public class BatchEnrichmentStatusViewModel
@@ -105,7 +105,7 @@ namespace LibrarySystem.ViewModels
         public double PercentComplete { get; set; }
         public TimeSpan ElapsedTime { get; set; }
         public TimeSpan EstimatedTimeRemaining { get; set; }
-        public string Status { get; set; } // "Processing", "Completed", "Failed"
+        public string Status { get; set; } = string.Empty; // "Processing", "Completed", "Failed"
         public List<string> RecentMessages { get; set; } = new();
     }
 }

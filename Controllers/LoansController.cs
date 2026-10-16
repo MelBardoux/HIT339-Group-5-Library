@@ -313,7 +313,7 @@ namespace LibrarySystem.Controllers
                         ItemId = loan.Item.Id,
                         FromBranchId = loan.Item.BranchId,
                         ToBranchId = nextReservation.BranchId,
-                        RequestedByUserId = userId,
+                        RequestedByUserId = userId!,
                         Status = TransferStatus.Pending,
                         RequestedDate = DateTime.Now
                     };

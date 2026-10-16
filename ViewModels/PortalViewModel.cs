@@ -28,22 +28,22 @@ namespace LibrarySystem.ViewModels
     public class SearchResultViewModel
     {
         public int Id { get; set; }
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public string Status { get; set; }
-        public string Summary { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
         public string BranchName { get; set; } = string.Empty;
     }
 
     public class PortalBookViewModel
     {
         public int Id { get; set; }
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string AuthorName { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
         public string? PublicationYear { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public string BranchName { get; set; } = string.Empty;
         public List<string> Genres { get; set; } = new();
     }
@@ -51,11 +51,11 @@ namespace LibrarySystem.ViewModels
     public class PortalToyViewModel
     {
         public int Id { get; set; }
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string AgeDisplay { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string AgeDisplay { get; set; } = string.Empty;
         public bool BatteryRequired { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public string BranchName { get; set; } = string.Empty;
         public List<string> Types { get; set; } = new();
     }
@@ -63,12 +63,12 @@ namespace LibrarySystem.ViewModels
     public class PortalMusicViewModel
     {
         public int Id { get; set; }
-        public string LibraryCode { get; set; }
-        public string Name { get; set; }
-        public string AlbumTitle { get; set; }
-        public string Artists { get; set; }
+        public string LibraryCode { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string AlbumTitle { get; set; } = string.Empty;
+        public string Artists { get; set; } = string.Empty;
         public string? ReleaseYear { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public string BranchName { get; set; } = string.Empty;
         public List<string> Formats { get; set; } = new();
         public List<string> Genres { get; set; } = new();

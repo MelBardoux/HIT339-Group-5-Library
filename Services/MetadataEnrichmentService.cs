@@ -9,10 +9,10 @@ namespace LibrarySystem.Services
     public interface IMetadataEnrichmentService
     {
         Task<CsvItemEnrichmentResult> EnrichBookWithExternalMetadataAsync(
-            string authorName, string title, string isbn = null);
+            string authorName, string title, string? isbn = null);
 
         Task<CsvItemEnrichmentResult> EnrichMusicWithExternalMetadataAsync(
-            string artistName, string albumTitle, string isrc = null);
+            string artistName, string albumTitle, string? isrc = null);
 
         Task<List<CsvItemEnrichmentResult>> EnrichMultipleItemsAsync(
             List<CsvItemEnrichmentRequest> requests, string itemType);
@@ -21,28 +21,28 @@ namespace LibrarySystem.Services
     public class CsvItemEnrichmentRequest
     {
         public int RowNumber { get; set; }
-        public string AuthorOrArtist { get; set; }
-        public string TitleOrAlbum { get; set; }
-        public string ISBN { get; set; }
-        public string ISRC { get; set; }
+        public string AuthorOrArtist { get; set; } = string.Empty;
+        public string TitleOrAlbum { get; set; } = string.Empty;
+        public string ISBN { get; set; } = string.Empty;
+        public string ISRC { get; set; } = string.Empty;
     }
 
     public class CsvItemEnrichmentResult
     {
         public int RowNumber { get; set; }
         public bool IsEnriched { get; set; }
-        public string EnrichmentSource { get; set; }
-        public string OriginalTitle { get; set; }
-        public string EnrichedTitle { get; set; }
-        public string EnrichedDescription { get; set; }
-        public string EnrichedAuthorOrArtist { get; set; }
+        public string EnrichmentSource { get; set; } = string.Empty;
+        public string OriginalTitle { get; set; } = string.Empty;
+        public string EnrichedTitle { get; set; } = string.Empty;
+        public string EnrichedDescription { get; set; } = string.Empty;
+        public string EnrichedAuthorOrArtist { get; set; } = string.Empty;
         public int? EnrichedYear { get; set; }
         public List<string> EnrichedCategories { get; set; } = new();
-        public string ISBN { get; set; }
+        public string ISBN { get; set; } = string.Empty;
         public decimal? Rating { get; set; }
-        public string CoverImageUrl { get; set; }
-        public string ConfidenceScore { get; set; }
-        public string ErrorMessage { get; set; }
+        public string CoverImageUrl { get; set; } = string.Empty;
+        public string ConfidenceScore { get; set; } = string.Empty;
+        public string ErrorMessage { get; set; } = string.Empty;
     }
 
     public class MetadataEnrichmentService : IMetadataEnrichmentService
@@ -59,7 +59,7 @@ namespace LibrarySystem.Services
         }
 
         public async Task<CsvItemEnrichmentResult> EnrichBookWithExternalMetadataAsync(
-            string authorName, string title, string isbn = null)
+            string authorName, string title, string? isbn = null)
         {
             var result = new CsvItemEnrichmentResult
             {
@@ -69,7 +69,7 @@ namespace LibrarySystem.Services
 
             try
             {
-                ExternalBookMetadata metadata = null;
+                ExternalBookMetadata? metadata = null;
 
                 // Try ISBN lookup first if available
                 if (!string.IsNullOrWhiteSpace(isbn))
@@ -123,7 +123,7 @@ namespace LibrarySystem.Services
         }
 
         public async Task<CsvItemEnrichmentResult> EnrichMusicWithExternalMetadataAsync(
-            string artistName, string albumTitle, string isrc = null)
+            string artistName, string albumTitle, string? isrc = null)
         {
             var result = new CsvItemEnrichmentResult
             {
@@ -133,7 +133,7 @@ namespace LibrarySystem.Services
 
             try
             {
-                ExternalMusicMetadata metadata = null;
+                ExternalMusicMetadata? metadata = null;
 
                 // Try ISRC lookup first if available
                 if (!string.IsNullOrWhiteSpace(isrc))
